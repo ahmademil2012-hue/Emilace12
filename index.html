@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Milbrav AI</title>
+<style>
+  :root {
+    --bg-main: #000000; --bg-sidebar: #171717; --bg-card: #212121; --bg-hover: #2f2f2f;
+    --bg-input-box: #1c1c1e; --bg-icon: #2c2c2e;
+    --text-primary: #ececec; --text-secondary: #b4b4b4; --text-muted: #8e8e8e;
+    --border-color: #333333; --accent-blue: #3b82f6; --accent-red: #ef4444; --accent-green: #10b981;
+    --radius-card: 16px; --radius-item: 12px;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; overflow: hidden; font-family: var(--font-main); background-color: var(--bg-main); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; border: none; background: transparent; color: inherit; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+  /* AUTH */
+  #auth-container { position: fixed; inset: 0; background: var(--bg-main); display: flex; align-items: center; justify-content: center; z-index: 500; }
+  .auth-card { width: 360px; max-width: 90vw; text-align: center; }
+  .auth-logo { width: 50px; height: 50px; border-radius: 50%; background: white; color: black; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; margin: 0 auto 20px; }
+  .auth-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .auth-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+  .auth-input { width: 100%; padding: 14px; margin-bottom: 12px; background: var(--bg-input-box); border: 1px solid var(--border-color); border-radius: 12px; color: white; font-size: 15px; outline: none; }
+  .auth-input:focus { border-color: #666; }
+  .auth-submit { width: 100%; padding: 14px; background: white; color: black; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 8px; }
+  .auth-toggle { margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+  .auth-toggle a { color: white; font-weight: 500; cursor: pointer; text-decoration: none; margin-left: 4px; }
+  .auth-error { color: var(--accent-red); font-size: 13px; margin-bottom: 10px; display: none; }
+
+  /* LAYOUT & SIDEBAR */
+  #app-container { display: none; height: 100vh; width: 100%; position: relative; }
+  #view-sidebar { position: absolute; inset: 0; background: var(--bg-sidebar); display: none; flex-direction: column; z-index: 10; }
+  #view-sidebar.active { display: flex; }
+  .sidebar-header { padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .sidebar-header h1 { font-size: 22px; font-weight: 600; }
+  .divider { height: 1px; background: var(--border-color); margin: 10px 20px; }
+  .sidebar-history { flex: 1; overflow-y: auto; padding: 0 12px; }
+  .history-item-wrapper { position: relative; overflow: hidden; margin-bottom: 4px; border-radius: var(--radius-item); }
+  .history-actions { position: absolute; top: 0; right: 0; bottom: 0; width: 100px; display: flex; z-index: 1; }
+  .btn-action { width: 50px; display: flex; align-items: center; justify-content: center; color: white; }
+  .btn-edit { background: #f39c12; }
+  .btn-del { background: #e74c3c; }
+  .history-item-content { background: var(--bg-sidebar); padding: 12px; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; position: relative; z-index: 2; transition: transform 0.2s, background 0.2s; user-select: none; }
+  .history-item-content:hover, .history-item-content.active { background: var(--bg-hover); }
+  .sidebar-bottom { padding: 16px 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .btn-new-chat-pill { display: flex; align-items: center; gap: 8px; background: var(--accent-blue); color: white; padding: 14px 20px; border-radius: 24px; font-size: 16px; font-weight: 600; }
+  .btn-profile { width: 48px; height: 48px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+
+  /* CHAT VIEW */
+  #view-chat { position: absolute; inset: 0; background: var(--bg-main); display: none; flex-direction: column; z-index: 20; }
+  #view-chat.active { display: flex; }
+  .chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+  .chat-header h2 { font-size: 18px; font-weight: 600; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 10px 20px 20px; }
+  .message { margin-bottom: 24px; display: flex; gap: 12px; }
+  .message.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .msg-avatar.user { background: #444; color: white; }
+  .msg-content { font-size: 16px; line-height: 1.6; white-space: pre-wrap; max-width: 100%; word-wrap: break-word; }
+  .message.user .msg-content { background: var(--bg-hover); padding: 12px 16px; border-radius: 20px; max-width: 85%; }
+
+  /* INPUT BOX */
+  .chat-input-area { padding: 10px 16px 24px; }
+  .chat-input-box { background: var(--bg-input-box); border: 1px solid #333; border-radius: 24px; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  #attachment-preview { display: none; padding: 8px 12px; background: var(--bg-icon); border-radius: 8px; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; align-items: center; justify-content: space-between; border: 1px solid #444; }
+  #attachment-preview span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
+  #attachment-preview button { color: var(--accent-red); font-weight: bold; font-size: 16px; }
+  .chat-input-box textarea { width: 100%; background: transparent; border: none; color: white; font-size: 16px; resize: none; outline: none; max-height: 120px; padding: 4px 0; font-family: inherit; }
+  .chat-input-box textarea::placeholder { color: #888; }
+  .input-controls { display: flex; justify-content: space-between; align-items: center; }
+  .left-controls { display: flex; align-items: center; gap: 8px; }
+  .right-controls { display: flex; align-items: center; gap: 8px; }
+  .btn-icon-circle { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-icon); color: var(--text-primary); display: flex; align-items: center; justify-content: center; }
+  .btn-model-pill { background: var(--bg-icon); color: var(--text-primary); padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .btn-send-new { width: 38px; height: 38px; border-radius: 50%; background: white; color: black; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+  .btn-send-new:disabled { background: #444; color: #888; }
+
+  /* PROFILE */
+  #view-profile { position: absolute; inset: 0; background: var(--bg-main); z-index: 30; display: none; flex-direction: column; overflow-y: auto; }
+  #view-profile.active { display: flex; }
+  .profile-header { padding: 16px 20px; display: flex; }
+  .btn-back { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; }
+  .profile-user-info { display: flex; flex-direction: column; align-items: center; padding-bottom: 24px; }
+  .profile-pic-large { width: 80px; height: 80px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-bottom: 12px; }
+  .profile-name { font-size: 20px; font-weight: 600; letter-spacing: 1px; }
+  .settings-section { padding: 0 16px 20px; }
+  .settings-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; padding-left: 8px; }
+  .settings-card { background: var(--bg-card); border-radius: var(--radius-card); overflow: hidden; display: flex; flex-direction: column; }
+  .setting-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+  .setting-item:last-child { border-bottom: none; }
+  .setting-item svg { width: 22px; height: 22px; color: var(--text-secondary); margin-right: 16px; }
+  .setting-text { flex: 1; font-size: 16px; }
+  .setting-value { color: var(--text-muted); font-size: 14px; margin-right: 8px; }
+  .text-blue { color: #60a5fa !important; font-weight: 600; }
+  .btn-logout-card { background: var(--bg-card); border-radius: var(--radius-card); padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; margin: 0 16px 24px; }
+  .btn-logout-card svg { color: var(--accent-red); }
+  .btn-logout-card span { color: var(--accent-red); font-size: 16px; font-weight: 500; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal-overlay.center { align-items: center; }
+  .bottom-sheet { background: var(--bg-input-box); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-header { display: flex; align-items: center; margin-bottom: 12px; position: relative; }
+  .sheet-header h3 { flex: 1; text-align: center; font-size: 18px; font-weight: 600; }
+  .sheet-header .close-btn { position: absolute; left: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--bg-icon); border-radius: 50%; color: #888; }
+
+  /* PLUS MENU */
+  .plus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .plus-item { background: #2c2c2e; border-radius: 16px; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; text-align: center; }
+  .plus-item svg { width: 28px; height: 28px; }
+  .plus-item span { font-size: 13px; font-weight: 500; }
+  .plus-list-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #333; cursor: pointer; }
+  .plus-list-item:last-child { border-bottom: none; }
+  .plus-list-left { display: flex; align-items: center; gap: 12px; }
+  .plus-list-left svg { width: 24px; height: 24px; color: #ccc; }
+  .plus-list-left .info h4 { font-size: 15px; font-weight: 500; }
+  .plus-list-left .info p { font-size: 13px; color: #888; }
+  
+  /* TOGGLE SWITCH */
+  .toggle-switch { width: 44px; height: 24px; background: #444; border-radius: 12px; position: relative; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+  .toggle-switch.active { background: var(--accent-blue); }
+  .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.2s; }
+  .toggle-switch.active::after { transform: translateX(20px); }
+
+  /* MODEL LIST */
+  .sub-header-text { text-align: center; color: #888; font-size: 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .manual-input-container { margin-bottom: 20px; padding: 0 4px; display: none; }
+  select.custom-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; font-size: 14px; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ececec%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%, 0 0; background-size: .65em auto, 100%; }
+  .model-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px; border-radius: 12px; cursor: pointer; border-bottom: 1px solid #2c2c2e; }
+  .model-item:last-child { border-bottom: none; }
+  .model-info h4 { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .model-info p { font-size: 13px; color: #888; margin-top: 4px; }
+  .model-check { color: var(--accent-blue); display: none; }
+  .model-item.selected .model-check { display: block; }
+  .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: #333; color: #ccc; font-weight: 600; }
+  .badge.pro { background: #3b82f6; color: white; }
+
+  .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 90vh; overflow-y: auto; margin: auto; }
+  .modal-content h3 { margin-bottom: 16px; font-size: 20px; text-align: center; }
+  .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 10px; text-align: center; }
+  .modal-btn.primary { background: white; color: black; }
+  .modal-btn.success { background: var(--accent-green); color: white; }
+  .modal-btn.danger { background: var(--accent-red); color: white; }
+  .modal-btn.outline { background: transparent; border: 1px solid #444; color: white; }
+  .qris-container { background: white; padding: 10px; border-radius: 12px; margin: 16px 0; text-align: center; }
+  .qris-container img { width: 100%; max-width: 250px; border-radius: 8px; object-fit: contain; }
+  .total-price { font-size: 24px; font-weight: bold; color: var(--accent-green); text-align: center; margin: 10px 0; }
+  .dev-request-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
+  .dev-request-card img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin: 10px 0; background: #000; }
+</style>
+</head>
+<body>
+
+<div id="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">M</div>
+    <h1 class="auth-title" id="auth-title">Selamat datang</h1>
+    <p class="auth-sub" id="auth-sub">Masuk untuk melanjutkan</p>
+    <div class="auth-error" id="auth-error"></div>
+    <input type="text" class="auth-input" id="auth-username" placeholder="Username" />
+    <input type="password" class="auth-input" id="auth-password" placeholder="Password" />
+    <button class="auth-submit" id="btn-auth-submit">Masuk</button>
+    <div class="auth-toggle">
+      <span id="auth-toggle-text">Belum punya akun?</span>
+      <a id="auth-toggle-link">Daftar</a>
+    </div>
+  </div>
+</div>
+
+<div id="app-container">
+  <div id="view-sidebar">
+    <div class="sidebar-header"><h1>Milbrav AI</h1></div>
+    <div class="divider"></div>
+    <div class="sidebar-history" id="sidebar-history"></div>
+    <div class="sidebar-bottom">
+      <button class="btn-new-chat-pill" id="btn-new-chat">+ Obrolan Baru</button>
+      <button class="btn-profile" id="btn-open-profile"><span id="sidebar-avatar-initial">U</span></button>
+    </div>
+  </div>
+
+  <div id="view-chat">
+    <div class="chat-header">
+      <button class="icon-btn" id="btn-open-sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h2 id="chat-title-header">Milbrav AI</h2>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    
+    <div class="chat-input-area">
+      <div class="chat-input-box">
+        <div id="attachment-preview"><span id="attachment-name">Nama File</span><button onclick="removeAttachment()">✕</button></div>
+        <textarea id="input-message" placeholder="Balas Milbrav..." rows="1"></textarea>
+        <div class="input-controls">
+          <div class="left-controls">
+            <button class="btn-icon-circle" id="btn-plus-menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="btn-model-pill" id="btn-model-selector"><span id="current-model-name">Milbrav AI</span><svg id="model-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <div class="right-controls">
+            <button class="btn-icon-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+            <button class="btn-send-new" id="btn-send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-profile">
+    <div class="profile-header"><button class="btn-back" id="btn-close-profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button></div>
+    <div class="profile-user-info"><div class="profile-pic-large"><span id="profile-avatar-initial">U</span></div><h2 class="profile-name" id="profile-username-display">USERNAME</h2></div>
+    
+    <div class="settings-section">
+      <div class="settings-title">Paket Langganan</div>
+      <div class="settings-card">
+        <div class="setting-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="setting-text">Status Paket</span><span class="setting-value" id="current-tier-display">Free</span></div>
+        <div class="setting-item" id="btn-show-upgrade"><svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="setting-text text-blue">Beli / Upgrade Paket</span></div>
+      </div>
+    </div>
+    
+    <div class="settings-section" id="dev-section" style="display:none;">
+      <div class="settings-title" style="color: #e74c3c;">Developer Area</div>
+      <div class="settings-card" style="padding: 16px; margin-bottom: 10px;">
+        <label style="font-size:12px; color:var(--text-muted); font-weight:bold;">Pengaturan API Global (KunciAI)</label>
+        <input type="password" id="input-api-key" placeholder="API Key KunciAI" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:white; margin-top:8px; margin-bottom:12px; outline:none;">
+        <input type="text" id="input-base-url" value="https://kunciai.id/v1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:white; margin-bottom:12px; outline:none;">
+        <button id="btn-save-api" style="width:100%; padding:10px; background:white; color:black; border-radius:8px; font-weight:bold; margin-top:12px;">Simpan API Key</button>
+      </div>
+      <div class="settings-card">
+        <div class="setting-item" id="btn-open-dev-panel"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span class="setting-text" style="color:#e74c3c;">Panel Konfirmasi Pembayaran</span></div>
+      </div>
+    </div>
+    <div class="btn-logout-card" id="btn-logout"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Keluar</span></div>
+  </div>
+</div>
+
+<!-- MODAL MODEL -->
+<div id="model-modal" class="modal-overlay">
+  <div class="bottom-sheet">
+    <div class="sheet-header"><button class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
+    <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    
+    <div class="manual-input-container" id="manual-model-container">
+      <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:block; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
+      <select id="select-manual-model" class="custom-select">
+        <option value="">-- Pilih Model Lain (KunciAI) --</option>
+        <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+        <option value="claude-sonnet-4.6">claude-sonnet-4.6</option>
+        <option value="gpt-5.6-luna">gpt-5.6-luna</option>
+        <option value="qwen3.7-max">qwen3.7-max</option>
+        <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+        <option value="claude-opus-4.6">claude-opus-4.6</option>
+        <option value="claude-opus-4.8">claude-opus-4.8</option>
+      </select>
+    </div>
+    
+    <div class="model-list" id="model-list-container"></div>
+    
+    <button class="modal-btn primary" id="btn-save-model-choice" style="margin-top: 24px;">Simpan Pilihan</button>
+  </div>
+</div>
+
+<!-- MODAL PLUS (+) -->
+<div id="plus-modal" class="modal-overlay">
+  <div class="bottom-sheet">
+    <div class="sheet-header"><button class="close-btn" onclick="closeModal('plus-modal')">✕</button><h3>Tambahkan ke chat</h3></div>
+    <div class="plus-grid">
+      <div class="plus-item" onclick="document.getElementById('input-camera').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Kamera</span></div>
+      <div class="plus-item" onclick="document.getElementById('input-photo').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
+      <div class="plus-item" onclick="document.getElementById('input-file').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><span>File</span></div>
+    </div>
+    <input type="file" id="input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleFileSelect(this)">
+    <input type="file" id="input-photo" accept="image/*" style="display:none" onchange="handleFileSelect(this)">
+    <input type="file" id="input-file" accept=".txt,.csv,.json,.pdf,.doc,.docx" style="display:none" onchange="handleFileSelect(this)">
+
+    <div class="plus-list-item" onclick="checkPremium('Proyek')">
+      <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><div class="info"><h4>Tambahkan ke proyek</h4><p>Tidak ada</p></div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    
+    <div class="plus-list-item" onclick="checkPremium('Pencarian Web')">
+      <div class="plus-list-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <div class="info"><h4>Pencarian web</h4></div>
+      </div>
+      <div class="toggle-switch" id="toggle-web-search"></div>
+    </div>
+    
+    <div class="plus-list-item" onclick="checkPremium('Konektor')">
+      <div class="plus-list-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        <div class="info"><h4>Konektor</h4></div>
+      </div>
+      <div style="color: var(--accent-blue); font-size: 12px; font-weight: bold;">Segera Hadir</div>
+    </div>
+    
+    <div class="plus-list-item" onclick="checkPremium('Memori')">
+      <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><div class="info"><h4>Memori</h4></div></div>
+      <div class="toggle-switch"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PEMBELIAN -->
+<div id="upgrade-modal" class="modal-overlay center">
+  <div class="modal-content">
+    <h3>Pilih Paket</h3>
+    <button class="modal-btn outline" onclick="showPayment('Premium', 17000)">Premium - Rp 17.000</button>
+    <button class="modal-btn outline" onclick="showPayment('Pro', 25000)">Pro - Rp 25.000</button>
+    <button class="modal-btn outline" onclick="showPayment('Pro+', 45000)">Pro+ - Rp 45.000</button>
+    <button class="modal-btn primary" onclick="closeModal('upgrade-modal')" style="background:#333; color:white; margin-top:20px;">Batal</button>
+  </div>
+</div>
+<div id="payment-modal" class="modal-overlay center">
+  <div class="modal-content">
+    <h3>Pembayaran</h3>
+    <p style="text-align:center; color:var(--text-muted);" id="pay-tier-name">Paket</p>
+    <div class="total-price" id="pay-total-price">Rp 0</div>
+    <div class="qris-container">
+      <!-- GAMBAR QRIS SUDAH DIGANTI DENGAN LINK DARI KAMU -->
+      <img src="https://cdn.phototourl.com/member/2026-10-31-7aac9dfe-fcd0-4346-a3e1-4c1ebb921f36.jpg" alt="QRIS">
+      <p style="color:black; font-size:12px; margin-top:8px;">Scan QRIS di atas</p>
+    </div>
+    <button class="modal-btn success" id="btn-sudah-bayar">Saya Sudah Bayar</button>
+    <button class="modal-btn primary" onclick="closeModal('payment-modal')" style="background:#333; color:white;">Batal</button>
+  </div>
+</div>
+<div id="proof-modal" class="modal-overlay center">
+  <div class="modal-content">
+    <h3>Kirim Bukti Transfer</h3>
+    <p style="text-align:center; font-size:14px; margin-bottom:16px;">Pilih foto/screenshot struk pembayaran Anda.</p>
+    <input type="file" id="proof-file" accept="image/*" style="width:100%; padding:10px; background:#222; border-radius:8px; color:white; margin-bottom:16px;">
+    <button class="modal-btn primary" id="btn-submit-proof">Kirim Bukti</button>
+    <button class="modal-btn outline" onclick="closeModal('proof-modal')">Batal</button>
+  </div>
+</div>
+<div id="dev-panel-modal" class="modal-overlay center">
+  <div class="modal-content" style="max-width: 500px;">
+    <h3>Panel Konfirmasi Pembayaran</h3>
+    <div id="dev-payment-list" style="margin-top:16px;"></div>
+    <button class="modal-btn primary" onclick="closeModal('dev-panel-modal')" style="margin-top:16px;">Tutup</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  "use strict";
+  const DEV_USERNAME = "DEVELOPER";
+  const DEV_PASSWORD = "ahmad emil";
+  let state = { user: null, chats: [], activeChatId: null };
+  const STORAGE_KEY = "milbrav_chat_app";
+  let isRegisterMode = false;
+  let tempSelectedModel = "";
+  let currentAttachment = null;
+  let isWebSearchActive = false;
+
+  const authContainer = document.getElementById("auth-container");
+  const appContainer = document.getElementById("app-container");
+  const viewSidebar = document.getElementById("view-sidebar");
+  const viewChat = document.getElementById("view-chat");
+  const viewProfile = document.getElementById("view-profile");
+  const inputMessage = document.getElementById("input-message");
+  const btnSend = document.getElementById("btn-send");
+
+  const MODELS = {
+    "claude-opus-4.8": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro" },
+    "claude-opus-4.6": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks dan tugas sehari-hari", badge: "Pro" },
+    "claude-sonnet-4.6": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas yang lebih sederhana", badge: "" },
+    "deepseek-v4-flash": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "" }
+  };
+
+  // ===== CEK KUOTA TIER =====
+  const getDailyLimit = () => {
+    const t = state.user ? state.user.tier : "free";
+    if (t === "dev" || t === "proplus") return Infinity;
+    if (t === "pro") return 2500;
+    if (t === "premium") return 700;
+    return 100;
+  };
+
+  // FITUR PREMIUM (PENCARIAN WEB DLL)
+  window.checkPremium = function(featureName) {
+    if (state.user.tier === "free" && !state.user.isDev) {
+      closeModal('plus-modal');
+      document.getElementById('upgrade-modal').classList.add('active');
+      return;
+    }
+    
+    // Kalau bukan free, jalankan fitur
+    if (featureName === 'Pencarian Web') {
+      isWebSearchActive = !isWebSearchActive;
+      const toggle = document.getElementById('toggle-web-search');
+      if (isWebSearchActive) toggle.classList.add('active');
+      else toggle.classList.remove('active');
+      closeModal('plus-modal');
+    } else {
+      alert(`Fitur ${featureName} segera hadir!`);
+    }
+  };
+
+  inputMessage.addEventListener("input", function() {
+    this.style.height = "auto"; this.style.height = Math.min(this.scrollHeight, 120) + "px";
+    btnSend.disabled = this.value.trim().length === 0 && !currentAttachment;
+  });
+  inputMessage.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!btnSend.disabled) btnSend.click(); }
+  });
+
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function loadState() { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} } }
+
+  // ===== AUTENTIKASI =====
+  document.getElementById("btn-auth-submit").addEventListener("click", () => {
+    const username = document.getElementById("auth-username").value.trim();
+    const password = document.getElementById("auth-password").value;
+    if (!username || !password) return showAuthError("Isi semua data!");
+    if (username === DEV_USERNAME && password === DEV_PASSWORD) {
+      state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
+      state.chats = []; state.activeChatId = null; saveState(); enterApp(); return;
+    }
+    let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
+    if (isRegisterMode) {
+      if (username === DEV_USERNAME) return showAuthError("Username dilarang!");
+      if (users[username]) return showAuthError("Username sudah dipakai!");
+      users[username] = { password, tier: "free", email: `${username}@gmail.com` };
+      localStorage.setItem("milbrav_users", JSON.stringify(users));
+      alert("Daftar berhasil! Silakan masuk."); toggleAuthMode(); return;
+    }
+    if (!users[username] || users[username].password !== password) return showAuthError("Username / Password salah!");
+    state.user = { username, tier: users[username].tier || "free", email: users[username].email };
+    state.chats = []; state.activeChatId = null;
+    const raw = localStorage.getItem(`milbrav_chats_${username}`);
+    if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
+    saveState(); enterApp();
+  });
+
+  function showAuthError(msg) { const el = document.getElementById("auth-error"); el.textContent = msg; el.style.display = "block"; }
+  function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById("auth-title").textContent = isRegisterMode ? "Buat akun" : "Selamat datang";
+    document.getElementById("btn-auth-submit").textContent = isRegisterMode ? "Daftar" : "Masuk";
+    document.getElementById("auth-toggle-text").textContent = isRegisterMode ? "Sudah punya akun?" : "Belum punya akun?";
+    document.getElementById("auth-toggle-link").textContent = isRegisterMode ? "Masuk" : "Daftar";
+    document.getElementById("auth-error").style.display = "none";
+  }
+  document.getElementById("auth-toggle-link").addEventListener("click", toggleAuthMode);
+
+  function enterApp() {
+    authContainer.style.display = "none"; appContainer.style.display = "block";
+    document.getElementById("profile-username-display").textContent = state.user.username;
+    document.getElementById("sidebar-avatar-initial").textContent = state.user.username.charAt(0).toUpperCase();
+    document.getElementById("profile-avatar-initial").textContent = state.user.username.charAt(0).toUpperCase();
+    document.getElementById("current-tier-display").textContent = state.user.tier.toUpperCase();
+    
+    if (state.user.isDev) {
+      document.getElementById("dev-section").style.display = "block";
+      const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+      document.getElementById("input-api-key").value = globalApi.apiKey || "";
+      document.getElementById("input-base-url").value = globalApi.baseUrl || "https://kunciai.id/v1";
+      
+      document.getElementById("manual-model-container").style.display = "block";
+      document.getElementById("model-sub-header").style.display = "flex";
+      document.getElementById("btn-save-model-choice").style.display = "block";
+    } else { 
+      document.getElementById("dev-section").style.display = "none"; 
+      
+      document.getElementById("manual-model-container").style.display = "none";
+      document.getElementById("model-sub-header").style.display = "none";
+      document.getElementById("btn-save-model-choice").style.display = "none";
+    }
+
+    document.getElementById("btn-model-selector").onclick = () => {
+      const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+      tempSelectedModel = globalApi.model || "deepseek-v4-flash";
+      document.getElementById("select-manual-model").value = ""; 
+      renderModelList();
+      document.getElementById("model-modal").classList.add("active");
+    };
+
+    const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    updateModelUI(globalApi.model || "deepseek-v4-flash");
+
+    viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
+    if (state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
+  }
+
+  document.getElementById("btn-plus-menu").addEventListener("click", () => document.getElementById("plus-modal").classList.add("active"));
+
+  function updateModelUI(modelId) {
+    let modelData = MODELS[modelId];
+    if (!modelData) {
+      modelData = { name: modelId, desc: "Model kustom" };
+    }
+    document.getElementById("current-model-name").textContent = modelData.name;
+  }
+
+  function renderModelList() {
+    const container = document.getElementById("model-list-container");
+    container.innerHTML = "";
+
+    Object.keys(MODELS).forEach(key => {
+      const m = MODELS[key];
+      const div = document.createElement("div");
+      div.className = "model-item" + (key === tempSelectedModel ? " selected" : "");
+      
+      div.innerHTML = `
+        <div class="model-info" style="flex:1;">
+          <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
+          <p>${m.desc}</p>
+        </div>
+        <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      `;
+
+      div.onclick = () => {
+        if (!state.user.isDev && key !== "deepseek-v4-flash") {
+          closeModal('model-modal');
+          document.getElementById('upgrade-modal').classList.add('active');
+          return;
+        }
+
+        if (state.user.isDev) {
+          tempSelectedModel = key;
+          document.getElementById("select-manual-model").value = ""; 
+          renderModelList(); 
+        } else {
+          let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+          gApi.model = key;
+          localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+          updateModelUI(key);
+          closeModal("model-modal");
+        }
+      };
+      container.appendChild(div);
+    });
+  }
+
+  document.getElementById("btn-save-model-choice").addEventListener("click", () => {
+    if (!state.user.isDev) return; 
+    
+    let finalModel = tempSelectedModel;
+    const selectValue = document.getElementById("select-manual-model").value;
+    if (selectValue) finalModel = selectValue;
+
+    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    gApi.model = finalModel;
+    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+    
+    updateModelUI(finalModel);
+    closeModal("model-modal");
+  });
+
+  function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+  window.closeModal = closeModal;
+
+  // Navigasi
+  document.getElementById("btn-open-sidebar").addEventListener("click", () => { viewChat.classList.remove("active"); viewSidebar.classList.add("active"); renderHistory(); });
+  document.getElementById("btn-open-profile").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewProfile.classList.add("active"); });
+  document.getElementById("btn-close-profile").addEventListener("click", () => { viewProfile.classList.remove("active"); viewSidebar.classList.add("active"); });
+  document.getElementById("btn-new-chat").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); createNewChat(false); });
+
+  // Riwayat
+  function renderHistory() {
+    const list = document.getElementById("sidebar-history"); list.innerHTML = "";
+    state.chats.forEach(c => {
+      const wrapper = document.createElement("div"); wrapper.className = "history-item-wrapper";
+      const actions = document.createElement("div"); actions.className = "history-actions";
+      const btnEdit = document.createElement("div"); btnEdit.className = "btn-action btn-edit";
+      btnEdit.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
+      btnEdit.onclick = (e) => { e.stopPropagation(); editChat(c.id); };
+      const btnDel = document.createElement("div"); btnDel.className = "btn-action btn-del";
+      btnDel.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+      btnDel.onclick = (e) => { e.stopPropagation(); deleteChat(c.id); };
+      actions.appendChild(btnEdit); actions.appendChild(btnDel);
+      const content = document.createElement("div");
+      content.className = "history-item-content" + (c.id === state.activeChatId ? " active" : "");
+      content.textContent = c.title;
+      
+      let startX = 0, startY = 0, isSwiping = false, isMoved = false;
+      content.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; isMoved = false; isSwiping = true; });
+      content.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        let diffX = startX - e.touches[0].clientX; let diffY = startY - e.touches[0].clientY;
+        if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) isMoved = true;
+        if (diffX > 0) content.style.transform = `translateX(-${Math.min(diffX, 100)}px)`;
+        else if (diffX < 0) content.style.transform = `translateX(0px)`;
+      });
+      content.addEventListener('touchend', (e) => {
+        isSwiping = false; let diffX = startX - e.changedTouches[0].clientX;
+        if (isMoved) {
+          if (diffX > 40) { content.style.transform = `translateX(-100px)`; content.classList.add('swiped'); }
+          else { content.style.transform = `translateX(0px)`; content.classList.remove('swiped'); }
+        } else {
+          if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; }
+          else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); }
+        }
+      });
+      content.addEventListener('click', (e) => {
+         if (!('ontouchstart' in window)) {
+             if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; }
+             else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); }
+         }
+      });
+      wrapper.appendChild(actions); wrapper.appendChild(content); list.appendChild(wrapper);
+    });
+  }
+
+  window.editChat = function(id) {
+    const chat = state.chats.find(c => c.id === id); if (!chat) return;
+    const newName = prompt("Masukkan nama baru:", chat.title);
+    if (newName && newName.trim() !== "") { chat.title = newName.trim(); saveUserChats(); renderHistory(); if (state.activeChatId === id) document.getElementById("chat-title-header").textContent = chat.title; }
+  };
+  window.deleteChat = function(id) {
+    if (!confirm("Hapus obrolan ini?")) return;
+    state.chats = state.chats.filter(c => c.id !== id); saveUserChats();
+    if (state.activeChatId === id) { if (state.chats.length > 0) openChat(state.chats[0].id); else createNewChat(true); }
+    renderHistory();
+  };
+  function createNewChat(isFirstLogin = false) {
+    if (!isFirstLogin && state.activeChatId) {
+      const activeChat = state.chats.find(c => c.id === state.activeChatId);
+      if (activeChat && activeChat.messages.length === 0) return; 
+    }
+    const chat = { id: "chat_" + Date.now(), title: "Obrolan Baru", messages: [] };
+    state.chats.unshift(chat); saveUserChats(); openChat(chat.id);
+  }
+  function openChat(id) {
+    state.activeChatId = id; document.getElementById("chat-title-header").textContent = state.chats.find(c => c.id === id).title;
+    renderChat(); renderHistory();
+  }
+  function saveUserChats() { if (state.user) localStorage.setItem(`milbrav_chats_${state.user.username}`, JSON.stringify(state.chats)); }
+  
+  // RENDER CHAT (Avatar AI Dihapus)
+  function renderChat() {
+    const chat = state.chats.find(c => c.id === state.activeChatId);
+    const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
+    chat.messages.forEach(m => {
+      const row = document.createElement("div"); row.className = "message " + m.role;
+      if (m.role === 'user') {
+        row.innerHTML = `<div class="msg-content">${m.content}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`;
+      } else {
+        row.innerHTML = `<div class="msg-content" style="padding-left: 0;">${m.content}</div>`;
+      }
+      box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ===== FITUR LAMPIRAN =====
+  window.handleFileSelect = function(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File terlalu besar. Maksimal 5MB ya bang!");
+      input.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      currentAttachment = {
+        name: file.name,
+        type: file.type,
+        isText: file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json'),
+        data: e.target.result
+      };
+      
+      document.getElementById("attachment-preview").style.display = "flex";
+      document.getElementById("attachment-name").textContent = file.name;
+      
+      if (currentAttachment) document.getElementById("btn-send").disabled = false;
+      
+      closeModal('plus-modal');
+      input.value = ""; 
+    };
+    
+    if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsDataURL(file);
+    }
+  };
+
+  window.removeAttachment = function() {
+    currentAttachment = null;
+    document.getElementById("attachment-preview").style.display = "none";
+    document.getElementById("btn-send").disabled = inputMessage.value.trim().length === 0;
+  };
+
+  // ===== KIRIM PESAN =====
+  btnSend.addEventListener("click", async () => {
+    const text = inputMessage.value.trim(); 
+    if (!text && !currentAttachment) return;
+    
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const usageKey = `milbrav_usage_${state.user.username}_${todayKey}`;
+    let usageToday = parseInt(localStorage.getItem(usageKey) || "0", 10);
+    const limit = getDailyLimit();
+
+    if (limit !== Infinity && usageToday >= limit) {
+      return alert(`Kuota harian paket ${state.user.tier.toUpperCase()} Anda sudah habis (${limit} pesan/hari). Silakan upgrade paket di menu Profil.`);
+    }
+
+    const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    
+    if (!globalApi.apiKey) {
+      if (state.user.isDev) return alert("Isi API Key KunciAI di menu Profil > Developer Area!");
+      else return alert("Sistem belum siap: API Key belum diatur.");
+    }
+
+    const chat = state.chats.find(c => c.id === state.activeChatId);
+    
+    let finalMessage = text;
+    if (currentAttachment) {
+      if (currentAttachment.isText) {
+        finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
+      } else {
+        finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nPesan User:\n${text}`;
+      }
+    }
+
+    chat.messages.push({ role: "user", content: finalMessage });
+    
+    removeAttachment();
+    if (chat.title === "Obrolan Baru") chat.title = (text || "Lampiran").substring(0, 20) + "...";
+    document.getElementById("chat-title-header").textContent = chat.title;
+    inputMessage.value = ""; inputMessage.style.height = "auto"; btnSend.disabled = true; renderChat();
+
+    const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
+    const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
+    loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">${loadingText}</div>`;
+    document.getElementById("chat-messages").appendChild(loadingRow);
+
+    try {
+      const modelToUse = globalApi.model || "deepseek-v4-flash";
+      const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
+
+      const res = await fetch('/api/chat', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          apiKey: globalApi.apiKey, 
+          baseUrl: globalApi.baseUrl, 
+          model: modelToUse, 
+          messages: apiMessages,
+          webSearch: isWebSearchActive 
+        })
+      });
+      
+      if (!res.ok) {
+        const errTxt = await res.text();
+        throw new Error(`Vercel Error (${res.status}): ${errTxt}`);
+      }
+      const data = await res.json();
+      document.getElementById("loading-row").remove();
+      
+      if (limit !== Infinity) {
+        localStorage.setItem(usageKey, usageToday + 1);
+      }
+
+      const aiText = data.choices?.[0]?.message?.content || "Tidak ada jawaban.";
+      chat.messages.push({ role: "assistant", content: aiText });
+      saveUserChats(); renderChat();
+    } catch(err) {
+      if(document.getElementById("loading-row")) document.getElementById("loading-row").remove();
+      alert("Gagal mengambil respons.\nDetail Error: " + err.message);
+      chat.messages.push({ role: "assistant", content: `❌ Error Sistem: ${err.message}` });
+      renderChat();
+    }
+    btnSend.disabled = false;
+  });
+
+  // ===== PENGATURAN DEV & PEMBAYARAN =====
+  document.getElementById("btn-save-api").addEventListener("click", () => {
+    const apiKey = document.getElementById("input-api-key").value; 
+    const baseUrl = document.getElementById("input-base-url").value;
+    
+    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    gApi.apiKey = apiKey;
+    gApi.baseUrl = baseUrl;
+    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); 
+    alert("API Key & Base URL berhasil disimpan!");
+  });
+
+  document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-modal").classList.add("active"));
+  document.getElementById("btn-sudah-bayar").addEventListener("click", () => { closeModal("payment-modal"); document.getElementById("proof-modal").classList.add("active"); });
+  let currentSelectedTier = ""; let currentSelectedPrice = 0;
+  window.showPayment = function(tier, price) {
+    currentSelectedTier = tier; currentSelectedPrice = price;
+    document.getElementById("pay-tier-name").textContent = "Paket " + tier;
+    document.getElementById("pay-total-price").textContent = "Rp " + price.toLocaleString('id-ID');
+    closeModal("upgrade-modal"); document.getElementById("payment-modal").classList.add("active");
+  };
+  document.getElementById("btn-submit-proof").addEventListener("click", () => {
+    const fileInput = document.getElementById("proof-file"); if (!fileInput.files.length) return alert("Pilih foto!");
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      let requests = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
+      requests.push({ id: "trx_" + Date.now(), username: state.user.username, tier: currentSelectedTier, price: currentSelectedPrice, proof: e.target.result, status: "pending", date: new Date().toLocaleString("id-ID") });
+      localStorage.setItem("milbrav_payment_requests", JSON.stringify(requests));
+      alert("Bukti dikirim! Tunggu konfirmasi Dev."); closeModal("proof-modal"); fileInput.value = "";
+    }; reader.readAsDataURL(fileInput.files[0]);
+  });
+
+  document.getElementById("btn-open-dev-panel").addEventListener("click", () => { document.getElementById("dev-panel-modal").classList.add("active"); renderDevPanel(); });
+  function renderDevPanel() {
+    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
+    const container = document.getElementById("dev-payment-list");
+    if (reqs.length === 0) { container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada request.</p>"; return; }
+    container.innerHTML = "";
+    reqs.forEach(r => {
+      if (r.status !== "pending") return;
+      const div = document.createElement("div"); div.className = "dev-request-card";
+      div.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:14px;"><b>${r.username}</b> <span>${r.date}</span></div><p style="margin:5px 0;">Paket: <b>${r.tier}</b> (Rp ${r.price.toLocaleString('id-ID')})</p><img src="${r.proof}"><div style="display:flex; gap:8px; margin-top:8px;"><button class="modal-btn success" onclick="accPayment('${r.id}')" style="margin:0;">Terima</button><button class="modal-btn danger" onclick="rejectPayment('${r.id}')" style="margin:0;">Tolak</button></div>`;
+      container.appendChild(div);
+    });
+  }
+  window.accPayment = function(id) {
+    if(!confirm("Terima pembayaran ini?")) return;
+    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
+    const req = reqs.find(r => r.id === id); req.status = "accepted"; localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
+    let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
+    if (users[req.username]) { users[req.username].tier = req.tier.toLowerCase(); localStorage.setItem("milbrav_users", JSON.stringify(users)); }
+    alert(`Diterima! Paket ${req.username} jadi ${req.tier}.`); renderDevPanel();
+  };
+  window.rejectPayment = function(id) {
+    if(!confirm("Tolak pembayaran ini?")) return;
+    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
+    reqs.find(r => r.id === id).status = "rejected"; localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
+    alert("Pembayaran ditolak."); renderDevPanel();
+  };
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    if(!confirm("Yakin mau keluar?")) return;
+    saveUserChats(); state.user = null; saveState(); viewChat.classList.remove("active"); viewProfile.classList.remove("active"); viewSidebar.classList.remove("active");
+    appContainer.style.display = "none"; authContainer.style.display = "flex"; document.getElementById("auth-username").value = ""; document.getElementById("auth-password").value = "";
+  });
+
+  loadState();
+  if (state.user) { enterApp(); } else { authContainer.style.display = "flex"; }
+})();
+</script>
+</body>
+</html>
