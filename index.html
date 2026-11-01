@@ -84,7 +84,7 @@
   #view-chat { position: absolute; inset: 0; background: var(--bg-main); display: none; flex-direction: column; z-index: 20; }
   #view-chat.active { display: flex; }
   .chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .chat-header h2 { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-header h2 { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;}
   .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
   .chat-messages { flex: 1; overflow-y: auto; min-height: 0; padding: 10px 20px 20px; }
   .message { margin-bottom: 24px; display: flex; gap: 12px; }
@@ -95,7 +95,8 @@
   .message.user .msg-content { background: var(--bg-hover); padding: 12px 16px; border-radius: 20px; max-width: 85%; white-space: pre-wrap;}
   
   /* CSS UNTUK GAMBAR & TABEL MARKDOWN */
-  .msg-image { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 10px; display: block; object-fit: contain; }
+  .msg-image { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 10px; display: block; object-fit: contain; cursor: pointer; transition: transform 0.2s; }
+  .msg-image:active { transform: scale(0.98); }
   .msg-content table { border-collapse: collapse; width: 100%; margin: 15px 0; display: block; overflow-x: auto; }
   .msg-content th, .msg-content td { border: 1px solid #444; padding: 8px 12px; text-align: left; }
   .msg-content th { background-color: #2c2c2e; font-weight: bold; }
@@ -237,6 +238,23 @@
   .swipe-dots { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: #333; transition: 0.3s; }
   .dot.active { background: #fff; width: 20px; border-radius: 10px; }
+
+  /* ===== MODAL FULLSCREEN GAMBAR (Gambar 4) ===== */
+  #image-preview-modal {
+      position: fixed; inset: 0; background: #000; z-index: 4000;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #image-preview-modal.active { display: flex; }
+  .img-preview-header { position: absolute; top: 0; left: 0; right: 0; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 10; }
+  .img-preview-header button { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; }
+  .img-preview-header .header-actions { display: flex; gap: 10px; }
+  .img-preview-header .btn-bagikan { background: white; color: black; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+  #image-preview-content { max-width: 100%; max-height: 80vh; object-fit: contain; }
+  .img-preview-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 10px; display: flex; justify-content: space-around; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 10; }
+  .img-action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #ccc; font-size: 12px; }
+  .img-action-btn svg { width: 24px; height: 24px; }
+  .img-action-btn:active { color: white; }
+  .img-action-btn.danger { color: var(--accent-red); }
 </style>
 </head>
 <body>
@@ -306,7 +324,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h2 id="chat-title-header">Milbrav AI</h2>
-      <button type="button" class="icon-btn" id="btn-new-chat-header" style="margin-left: auto;">
+      <button type="button" class="icon-btn" id="btn-new-chat-header">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
       </button>
     </div>
@@ -569,6 +587,11 @@
           <span style="color:#3b82f6;">Pro</span>
         </div>
         <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pembuatan gambar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak obrolan suara</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Memori lebih panjang</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Model canggih dan memori</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Pembuatan gambar kualitas lebih tinggi</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Otomatisasi tugas terjadwal</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
@@ -587,11 +610,17 @@
           <span style="color:#3b82f6;">Pro+</span>
         </div>
         <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pembuatan gambar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak obrolan suara</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Memori lebih panjang</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Model canggih dan memori</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Pembuatan gambar kualitas lebih tinggi</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Otomatisasi tugas terjadwal</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Codex untuk pemrograman</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name" style="color:#10b981; font-weight:bold;">Pro+ sudah tidak ada limit</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name" style="color:#10b981; font-weight:bold;">Bisa buat ketik prompt saja (Auto Gambar)</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
       </div>
       <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro+', 45000)">Update Akun Baru</button>
       <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
@@ -603,6 +632,42 @@
     <div class="dot active" onclick="scrollToCard(0)"></div>
     <div class="dot" onclick="scrollToCard(1)"></div>
     <div class="dot" onclick="scrollToCard(2)"></div>
+  </div>
+</div>
+
+<!-- ================= MODAL PREVIEW GAMBAR (Gambar 4) ================= -->
+<div id="image-preview-modal">
+  <div class="img-preview-header">
+    <button onclick="closeImagePreview()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="header-actions">
+        <button onclick="downloadImage()" title="Download">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="btn-bagikan" onclick="shareImage()">Bagikan</button>
+    </div>
+  </div>
+
+  <img id="image-preview-content" src="" alt="Preview">
+
+  <div class="img-preview-footer">
+    <div class="img-action-btn" onclick="mockFeature('Edit')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Edit</span>
+    </div>
+    <div class="img-action-btn" onclick="mockFeature('Anotasi')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        <span>Anotasi</span>
+    </div>
+    <div class="img-action-btn" onclick="mockFeature('Ubah Ukuran')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span>Ubah Ukuran</span>
+    </div>
+    <div class="img-action-btn danger" onclick="deleteImage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Hapus</span>
+    </div>
   </div>
 </div>
 
@@ -664,6 +729,7 @@
   let tempSelectedModel = "";
   let currentAttachment = null;
   let isWebSearchActive = false;
+  let currentPreviewImageUrl = "";
 
   const authContainer = document.getElementById("auth-container");
   const appContainer = document.getElementById("app-container");
@@ -969,7 +1035,6 @@
       if (username === DEV_USERNAME && password === DEV_PASSWORD) {
         state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
         
-        // LOAD CHAT HISTORY UNTUK DEV
         state.chats = []; 
         const raw = localStorage.getItem(`milbrav_chats_${DEV_USERNAME}`);
         if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
@@ -1247,24 +1312,20 @@
       element.innerHTML = '<span class="typing-cursor"></span>';
       
       let i = 0;
-      const speed = 15; // ms per karakter (15ms = cukup cepat)
+      const speed = 15; 
       
       return new Promise(resolve => {
           const timer = setInterval(() => {
-              i += 3; // Ngetik 3 huruf sekali jalan biar gak terlalu lambat
-              
+              i += 3; 
               let partial = fullText.substring(0, i);
-              // Escape HTML tags biar ga render markdown setengah jalan
               let escaped = partial.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
               element.innerHTML = escaped.replace(/\n/g, '<br>') + '<span class="typing-cursor"></span>';
               
-              // Auto scroll ke bawah
               const chatBox = document.getElementById("chat-messages");
               chatBox.scrollTop = chatBox.scrollHeight;
 
               if (i >= fullText.length) {
                   clearInterval(timer);
-                  // Render Markdown final
                   element.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
                   renderMathInElement(element, {
                       delimiters: [
@@ -1291,10 +1352,9 @@
 
       if (m.role === 'assistant') {
           if (typingMode && index === chat.messages.length - 1) {
-              // Biarkan kosong untuk efek ngetik
               row.innerHTML = `<div class="msg-content markdown-body" id="typing-target" style="padding-left: 0;"></div>`;
           } else {
-              let rawText = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
+              let rawText = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">');
               let parsed = marked.parse(rawText);
               contentHtml = DOMPurify.sanitize(parsed);
               row.innerHTML = `<div class="msg-content markdown-body" style="padding-left: 0;">${contentHtml}</div>`;
@@ -1303,13 +1363,13 @@
           if (Array.isArray(m.content)) {
               m.content.forEach(part => {
                   if (part.type === "text") {
-                      contentHtml += `<div>${part.text.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">')}</div>`;
+                      contentHtml += `<div>${part.text.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">')}</div>`;
                   } else if (part.type === "image_url") {
-                      contentHtml += `<img src="${part.image_url.url}" class="msg-image" style="max-width: 200px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;">`;
+                      contentHtml += `<img src="${part.image_url.url}" class="msg-image" style="max-width: 200px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;" onclick="openImagePreview(this.src)">`;
                   }
               });
           } else {
-              contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
+              contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">');
           }
           row.innerHTML = `<div class="msg-content">${contentHtml}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`;
       }
@@ -1329,6 +1389,39 @@
         });
     }
   }
+
+  // ====== FITUR PREVIEW GAMBAR (Gambar 4) ======
+  window.openImagePreview = function(src) {
+      currentPreviewImageUrl = src;
+      document.getElementById("image-preview-content").src = src;
+      document.getElementById("image-preview-modal").classList.add("active");
+  };
+  window.closeImagePreview = function() {
+      document.getElementById("image-preview-modal").classList.remove("active");
+  };
+  window.downloadImage = function() {
+      const a = document.createElement("a");
+      a.href = currentPreviewImageUrl;
+      a.download = "Milbrav_Image_" + Date.now() + ".jpg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+  };
+  window.shareImage = function() {
+      if (navigator.share) {
+          navigator.share({ title: 'Milbrav AI', url: currentPreviewImageUrl });
+      } else {
+          alert("Fitur share tidak didukung di browser ini. Silakan download gambarnya.");
+      }
+  };
+  window.mockFeature = function(name) {
+      alert(`Fitur "${name}" akan segera hadir di versi selanjutnya!`);
+  };
+  window.deleteImage = function() {
+      if(!confirm("Hapus gambar ini dari tampilan? (Tidak menghapus dari chat)")) return;
+      closeImagePreview();
+  };
+
 
   window.handleFileSelect = async function(input) {
     if (!input.files || !input.files[0]) return;
@@ -1428,9 +1521,44 @@
     localStorage.removeItem(draftKey);
 
     inputMessage.value = ""; inputMessage.style.height = "auto"; updateSendButtonState(); 
-    renderChat(); // Render chat tanpa efek ngetik dulu
+    renderChat(); 
 
     const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
+    
+    // ====== DETEKSI KATA KUNCI GAMBAR UNTUK PRO+ ======
+    const isImagePrompt = /gambar|logo|foto|ilustrasi|bikin|buat/i.test(text);
+    const isProPlus = (state.user.tier === 'proplus' || state.user.isDev);
+
+    if (isImagePrompt && isProPlus) {
+        loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">🎨 Menggambar...</div>`;
+        document.getElementById("chat-messages").appendChild(loadingRow);
+
+        try {
+            // Pakai Pollinations AI untuk generate gambar gratis
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true`;
+            
+            // Simulasi delay biar berasa loading
+            await new Promise(r => setTimeout(r, 3000));
+            
+            const aiText = `Ini gambar yang Bos minta:\n\n![Gambar](${imageUrl})`;
+            chat.messages.push({ role: "assistant", content: aiText });
+            saveUserChats();
+            
+            document.getElementById("loading-row").remove();
+            renderChat(true);
+            const typingTarget = document.getElementById("typing-target");
+            if (typingTarget) await typeMessage(typingTarget, aiText);
+            if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
+            return; // Selesai, tidak lanjut ke API Chat biasa
+        } catch (err) {
+            document.getElementById("loading-row").remove();
+            chat.messages.push({ role: "assistant", content: `❌ Gagal membuat gambar: ${err.message}` });
+            renderChat();
+            return;
+        }
+    }
+
+    // ====== CHAT TEXT BIASA ======
     const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
     loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">${loadingText}</div>`;
     document.getElementById("chat-messages").appendChild(loadingRow);
@@ -1462,14 +1590,9 @@
       chat.messages.push({ role: "assistant", content: aiText });
       saveUserChats();
       
-      // Render chat dengan efek ngetik
       renderChat(true);
       const typingTarget = document.getElementById("typing-target");
-      if (typingTarget) {
-          await typeMessage(typingTarget, aiText);
-      } else {
-          renderChat(); // Fallback
-      }
+      if (typingTarget) await typeMessage(typingTarget, aiText);
     } catch(err) {
       if(document.getElementById("loading-row")) document.getElementById("loading-row").remove();
       alert("Gagal mengambil respons.\nDetail Error: " + err.message);
@@ -1484,102 +1607,3 @@
     let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     gApi.apiKey = apiKey; gApi.baseUrl = baseUrl;
     localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); 
-    alert("API Key & Base URL berhasil disimpan!");
-  });
-
-  document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-carousel-modal").classList.add("active"));
-  document.getElementById("btn-sudah-bayar").addEventListener("click", () => { closeModal("payment-modal"); document.getElementById("proof-modal").classList.add("active"); });
-  let currentSelectedTier = ""; let currentSelectedPrice = 0;
-  window.showPayment = function(tier, price) {
-    currentSelectedTier = tier; currentSelectedPrice = price;
-    document.getElementById("pay-tier-name").textContent = "Paket " + tier;
-    document.getElementById("pay-total-price").textContent = "Rp " + price.toLocaleString('id-ID');
-    closeModal("upgrade-carousel-modal"); document.getElementById("payment-modal").classList.add("active");
-  };
-  
-  function compressImage(base64Str, maxWidth = 800, quality = 0.7) {
-    return new Promise((resolve) => {
-      let img = new Image(); img.src = base64Str;
-      img.onload = () => {
-        let canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
-        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-        canvas.width = width; canvas.height = height;
-        let ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-    });
-  }
-
-  document.getElementById("btn-submit-proof").addEventListener("click", () => {
-    const fileInput = document.getElementById("proof-file"); 
-    if (!fileInput.files.length) return alert("Pilih foto!");
-    const file = fileInput.files[0]; const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const compressedBase64 = await compressImage(e.target.result);
-        let requests = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-        requests.push({ id: "trx_" + Date.now(), username: state.user.username, tier: currentSelectedTier, price: currentSelectedPrice, proof: compressedBase64, status: "pending", date: new Date().toLocaleString("id-ID") });
-        localStorage.setItem("milbrav_payment_requests", JSON.stringify(requests));
-        alert("Bukti berhasil dikirim! Tunggu konfirmasi Dev."); closeModal("proof-modal"); fileInput.value = "";
-      } catch (err) { alert("Gagal memproses gambar: " + err.message); }
-    }; reader.readAsDataURL(file);
-  });
-
-  document.getElementById("btn-open-dev-panel").addEventListener("click", () => { document.getElementById("dev-panel-modal").classList.add("active"); renderDevPanel(); });
-  function renderDevPanel() {
-    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-    const container = document.getElementById("dev-payment-list");
-    if (reqs.length === 0) { container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada request.</p>"; return; }
-    container.innerHTML = "";
-    reqs.forEach(r => {
-      if (r.status !== "pending") return;
-      const div = document.createElement("div"); div.className = "dev-request-card";
-      div.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:14px;"><b>${r.username}</b> <span>${r.date}</span></div><p style="margin:5px 0;">Paket: <b>${r.tier}</b> (Rp ${r.price.toLocaleString('id-ID')})</p><img src="${r.proof}"><div style="display:flex; gap:8px; margin-top:8px;"><button class="modal-btn success" onclick="accPayment('${r.id}')" style="margin:0;">Terima</button><button class="modal-btn danger" onclick="rejectPayment('${r.id}')" style="margin:0;">Tolak</button></div>`;
-      container.appendChild(div);
-    });
-  }
-  window.accPayment = function(id) {
-    if(!confirm("Terima pembayaran ini? Masa aktif akan diset 30 hari.")) return;
-    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-    const req = reqs.find(r => r.id === id); 
-    req.status = "accepted"; 
-    localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
-    
-    let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
-    if (users[req.username]) { 
-        users[req.username].tier = req.tier.toLowerCase(); 
-        const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
-        users[req.username].expiryDate = expiryDate;
-        localStorage.setItem("milbrav_users", JSON.stringify(users)); 
-    }
-    
-    alert(`Diterima! Paket ${req.username} jadi ${req.tier} selama 30 hari.`); 
-    renderDevPanel();
-  };
-  window.rejectPayment = function(id) {
-    if(!confirm("Tolak pembayaran ini?")) return;
-    let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-    reqs.find(r => r.id === id).status = "rejected"; localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
-    alert("Pembayaran ditolak."); renderDevPanel();
-  };
-
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    if(!confirm("Yakin mau keluar?")) return;
-    saveUserChats(); state.user = null; saveState(); viewChat.classList.remove("active"); viewProfile.classList.remove("active"); viewSidebar.classList.remove("active");
-    appContainer.style.display = "none"; authContainer.style.display = "none"; splashContainer.style.display = "none"; landingContainer.style.display = "flex";
-    document.getElementById("auth-username").value = ""; document.getElementById("auth-password").value = "";
-  });
-
-  try {
-    loadState();
-    if (state.user) { 
-      splashContainer.style.display = "none"; landingContainer.style.display = "none"; enterApp(); 
-    } else { 
-      splashContainer.style.display = "flex"; landingContainer.style.display = "none"; authContainer.style.display = "none";
-      setTimeout(() => { splashContainer.style.display = "none"; landingContainer.style.display = "flex"; }, 2000); 
-    }
-  } catch(e) { console.error(e); splashContainer.style.display = "none"; landingContainer.style.display = "none"; authContainer.style.display = "flex"; }
-})();
-</script>
-</body>
-</html>
