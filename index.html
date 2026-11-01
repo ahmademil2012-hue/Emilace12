@@ -2,10 +2,8 @@
 <html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
-<!-- viewport-fit=cover agar layar HP menyesuaikan lengkungan/gestur -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Milbrav AI</title>
-<!-- Library buat Export PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
@@ -18,57 +16,23 @@
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  html, body { 
-    height: 100%; height: 100dvh; width: 100%; overflow: hidden; position: fixed; inset: 0;
-    font-family: var(--font-main); background-color: var(--bg-main); color: var(--text-primary); 
-    -webkit-font-smoothing: antialiased; 
-  }
-  
+  html, body { height: 100%; height: 100dvh; width: 100%; overflow: hidden; position: fixed; inset: 0; font-family: var(--font-main); background-color: var(--bg-main); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
   button { font-family: inherit; cursor: pointer; border: none; background: transparent; color: inherit; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
 
   /* ===== 1. SPLASH SCREEN ===== */
-  #splash-container {
-    position: fixed; inset: 0; z-index: 3000;
-    background: radial-gradient(circle at center, #001f3f 0%, #000000 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
-  .splash-logo {
-    width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
-    border: 3px solid var(--accent-neon);
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-    margin-bottom: 20px;
-    animation: pulse-logo 1.5s infinite alternate;
-  }
-  @keyframes pulse-logo {
-    from { transform: scale(1); box-shadow: 0 0 20px rgba(0,212,255,0.4); }
-    to { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,212,255,0.8); }
-  }
-  .spinner {
-    width: 30px; height: 30px; border: 3px solid rgba(0, 212, 255, 0.3);
-    border-top: 3px solid var(--accent-neon); border-radius: 50%;
-    animation: spin 1s linear infinite; margin-top: 10px;
-  }
+  #splash-container { position: fixed; inset: 0; z-index: 3000; background: radial-gradient(circle at center, #001f3f 0%, #000000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .splash-logo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-neon); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); margin-bottom: 20px; animation: pulse-logo 1.5s infinite alternate; }
+  @keyframes pulse-logo { from { transform: scale(1); box-shadow: 0 0 20px rgba(0,212,255,0.4); } to { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,212,255,0.8); } }
+  .spinner { width: 30px; height: 30px; border: 3px solid rgba(0, 212, 255, 0.3); border-top: 3px solid var(--accent-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-top: 10px; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   .skip-text { margin-top: 20px; color: #888; font-size: 14px; animation: blink 1.5s infinite; }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   /* ===== 2. LANDING PAGE ===== */
-  #landing-container {
-    position: fixed; inset: 0; z-index: 2000;
-    background: radial-gradient(circle at center, #001f3f 0%, #000000 100%);
-    display: none; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 20px; overflow-y: auto;
-  }
-  .landing-logo {
-    width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
-    border: 3px solid var(--accent-neon);
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-    margin-bottom: 20px;
-  }
+  #landing-container { position: fixed; inset: 0; z-index: 2000; background: radial-gradient(circle at center, #001f3f 0%, #000000 100%); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; overflow-y: auto; }
+  .landing-logo { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-neon); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); margin-bottom: 20px; }
   .landing-title { font-size: 36px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(90deg, #00d4ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;}
   .landing-sub { color: var(--text-secondary); font-size: 16px; margin-bottom: 30px; font-weight: 500; }
   .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; margin-bottom: 40px; }
@@ -196,8 +160,6 @@
   /* MODEL LIST & SELECT */
   .sub-header-text { text-align: center; color: #888; font-size: 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 4px; }
   .manual-input-container { margin-bottom: 20px; padding: 0 4px; display: none; }
-  
-  /* Update Style Select agar Mendukung Optgroup */
   select.custom-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; font-size: 14px; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ececec%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%, 0 0; background-size: .65em auto, 100%; }
   optgroup { background: #1c1c1e; color: var(--accent-blue); font-weight: bold; }
   option { background: #1c1c1e; color: white; font-weight: normal; }
@@ -210,6 +172,10 @@
   .model-item.selected .model-check { display: block; }
   .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: #333; color: #ccc; font-weight: 600; }
   .badge.pro { background: #3b82f6; color: white; }
+  
+  /* GEAR ICON UNTUK DEV */
+  .btn-gear { background: #2c2c2e; border-radius: 6px; padding: 6px 8px; font-size: 14px; color: #ccc; cursor: pointer; margin-left: 10px; }
+  .btn-gear:hover { background: #444; }
 
   .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 85vh; overflow-y: auto; margin: auto; }
   .modal-content h3 { margin-bottom: 16px; font-size: 20px; text-align: center; }
@@ -224,7 +190,7 @@
   .dev-request-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
   .dev-request-card img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin: 10px 0; background: #000; }
 
-  /* STYLE UNTUK LAPORAN BUG (WARNA ABU-ABU) */
+  /* STYLE UNTUK LAPORAN BUG */
   .bug-time-text { color: #888; font-size: 12px; margin-top: 6px; font-weight: 500; }
 </style>
 </head>
@@ -384,13 +350,12 @@
   <div class="bottom-sheet">
     <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    
+    <!-- KHUSUS DEV -->
     <div class="manual-input-container" id="manual-model-container">
       <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:block; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
-      
-      <!-- UPDATE: DAFTAR MODEL DARI GAMBAR 2 -->
       <select id="select-manual-model" class="custom-select">
         <option value="">-- Pilih Model Lain (KunciAI) --</option>
-        
         <optgroup label="DeepSeek Models">
           <option value="deepseek-v4.1-flash">deepseek-v4.1-flash</option>
           <option value="prov3-deepseek-v4.1-flash">prov3-deepseek-v4.1-flash</option>
@@ -402,7 +367,6 @@
           <option value="deepseek-v4-pro-0813">deepseek-v4-pro-0813</option>
           <option value="prov3-deepseek-v4-pro">prov3-deepseek-v4-pro</option>
         </optgroup>
-
         <optgroup label="Claude Models">
           <option value="claude-sonnet-4.6">claude-sonnet-4.6</option>
           <option value="claude-opus-4.6">claude-opus-4.6</option>
@@ -410,7 +374,6 @@
           <option value="claude-opus-5">claude-opus-5</option>
           <option value="prov3-claude-opus-5">prov3-claude-opus-5</option>
         </optgroup>
-
         <optgroup label="OpenAI / GPT Models">
           <option value="gpt-5.4-mini">gpt-5.4-mini</option>
           <option value="gpt-5.5">gpt-5.5</option>
@@ -425,7 +388,6 @@
           <option value="prov3-gpt-5.6-luna">prov3-gpt-5.6-luna</option>
           <option value="prov3-gpt-5.6-sol">prov3-gpt-5.6-sol</option>
         </optgroup>
-
         <optgroup label="GLM / Zhipu Models">
           <option value="glm-5.3-flash">glm-5.3-flash</option>
           <option value="glm-5.3-flashx">glm-5.3-flashx</option>
@@ -435,14 +397,12 @@
           <option value="glm-5.3">glm-5.3</option>
           <option value="prov3-glm-5.2">prov3-glm-5.2</option>
         </optgroup>
-
         <optgroup label="Grok Models">
           <option value="grok-4.5">grok-4.5</option>
           <option value="grok-4.6">grok-4.6</option>
           <option value="grok-4.7">grok-4.7</option>
           <option value="prov3-grok-4.5">prov3-grok-4.5</option>
         </optgroup>
-
         <optgroup label="Lainnya (Kimi, Qwen, Minimax)">
           <option value="kimi-k2.5">kimi-k2.5</option>
           <option value="kimi-k2.7">kimi-k2.7</option>
@@ -613,28 +573,60 @@
   const inputMessage = document.getElementById("input-message");
   const btnSend = document.getElementById("btn-send");
 
-  // UPDATE: DAFTAR UI MODEL (GAMBAR 1)
-  const MODELS = {
-    "claude-opus-5": { name: "Claude Opus 5", desc: "Kecerdasan tertinggi", badge: "Pro" },
-    "claude-opus-4.8": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro" },
-    "claude-opus-4.6": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro" },
-    "claude-sonnet-4.6": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium" },
+  // ===== FITUR MODEL MAPPING (BISA DIUBAH DEV) =====
+  let MODELS = {
+    "milbrav-opus-5": { name: "Claude Opus 5", desc: "Kecerdasan tertinggi", badge: "Pro", apiId: "claude-opus-5" },
+    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "claude-opus-4.8" },
+    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "claude-opus-4.6" },
+    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "claude-sonnet-4.6" },
+    "milbrav-gpt6": { name: "GPT-6 Luna", desc: "Model masa depan dari OpenAI", badge: "Pro", apiId: "gpt-6-luna" },
+    "milbrav-gpt56": { name: "GPT-5.6 Luna", desc: "Standar pintar & cepat", badge: "Premium", apiId: "gpt-5.6-luna" },
+    "milbrav-gpt54": { name: "GPT-5.4 Mini", desc: "Hemat dan ringan", badge: "Premium", apiId: "gpt-5.4-mini" },
+    "milbrav-deepseek": { name: "DeepSeek V4.1", desc: "Update terbaru paling cepat", badge: "", apiId: "deepseek-v4.1-flash" },
+    "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "deepseek-v4-flash" },
+    "milbrav-pro": { name: "DeepSeek V4 Pro", desc: "Penalaran berat", badge: "Pro", apiId: "deepseek-v4-pro" },
+    "milbrav-qwen38": { name: "Qwen 3.8 Max", desc: "Raksasa dari Alibaba", badge: "Premium", apiId: "qwen3.8-max" },
+    "milbrav-qwen37": { name: "Qwen 3.7 Max", desc: "Cepat dan cerdas", badge: "", apiId: "qwen3.7-max" },
+    "milbrav-glm": { name: "GLM 5.3", desc: "Kecerdasan dari Zhipu AI", badge: "Premium", apiId: "glm-5.3" },
+    "milbrav-grok": { name: "Grok 4.7", desc: "Cerdas dan berani dari xAI", badge: "Premium", apiId: "grok-4.7" },
+    "milbrav-kimi": { name: "Kimi K3", desc: "Ahli konteks panjang", badge: "Premium", apiId: "kimi-k3" },
+    "milbrav-minimax": { name: "Minimax M3", desc: "Cepat dan hemat", badge: "", apiId: "minimax-m3" }
+  };
+
+  // Load custom mapping dari LocalStorage jika Dev pernah mengubahnya
+  function loadModelMapping() {
+    const saved = localStorage.getItem("milbrav_model_mapping");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        for (let key in parsed) {
+          if (MODELS[key]) MODELS[key].apiId = parsed[key];
+        }
+      } catch(e) {}
+    }
+  }
+  loadModelMapping();
+
+  function saveModelMapping() {
+    let map = {};
+    for (let key in MODELS) { map[key] = MODELS[key].apiId; }
+    localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
+  }
+
+  // Fungsi ubah API ID via tombol Gear (Khusus Dev)
+  window.editModelApiId = function(e, key) {
+    e.stopPropagation();
+    if (!state.user.isDev) return;
+
+    let currentApiId = MODELS[key].apiId;
+    let newApiId = prompt(`Ubah ID KunciAI untuk "${MODELS[key].name}"\n\nSaat ini: ${currentApiId}\n\n(Masukkan ID persis seperti di dashboard KunciAI)`, currentApiId);
     
-    "gpt-6-luna": { name: "GPT-6 Luna", desc: "Model masa depan dari OpenAI", badge: "Pro" },
-    "gpt-5.6-luna": { name: "GPT-5.6 Luna", desc: "Standar pintar & cepat", badge: "Premium" },
-    "gpt-5.4-mini": { name: "GPT-5.4 Mini", desc: "Hemat dan ringan", badge: "Premium" },
-    
-    "deepseek-v4.1-flash": { name: "DeepSeek V4.1", desc: "Update terbaru paling cepat", badge: "" },
-    "deepseek-v4-flash": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "" },
-    "deepseek-v4-pro": { name: "DeepSeek V4 Pro", desc: "Penalaran berat", badge: "Pro" },
-    
-    "qwen3.8-max": { name: "Qwen 3.8 Max", desc: "Raksasa dari Alibaba", badge: "Premium" },
-    "qwen3.7-max": { name: "Qwen 3.7 Max", desc: "Cepat dan cerdas", badge: "" },
-    
-    "glm-5.3": { name: "GLM 5.3", desc: "Kecerdasan dari Zhipu AI", badge: "Premium" },
-    "grok-4.7": { name: "Grok 4.7", desc: "Cerdas dan berani dari xAI", badge: "Premium" },
-    "kimi-k3": { name: "Kimi K3", desc: "Ahli konteks panjang", badge: "Premium" },
-    "minimax-m3": { name: "Minimax M3", desc: "Cepat dan hemat", badge: "" }
+    if (newApiId && newApiId.trim() !== "") {
+      MODELS[key].apiId = newApiId.trim();
+      saveModelMapping();
+      alert(`Berhasil! ${MODELS[key].name} sekarang menggunakan model backend: ${newApiId}`);
+      renderModelList();
+    }
   };
 
   // ===== FUNGSI WAKTU (WIB/WITA/WIT) =====
@@ -743,7 +735,7 @@
   };
 
   // ===== LOGIKA AKSES AI (TIERING) =====
-  function canAccessModel(modelId) {
+  function canAccessModel(modelKey) {
     if (state.user.isDev) return true;
     
     const userTier = (state.user.tier || "free").toLowerCase();
@@ -753,31 +745,9 @@
     else if (userTier === "pro") userLevel = 2;
     else if (userTier === "proplus") userLevel = 3;
     
-    // Default model level
     let modelLevel = 0; 
-    
-    // Premium Models
-    if (
-      modelId.includes("sonnet") || 
-      modelId.includes("luna") || 
-      modelId.includes("qwen3.7-max") || 
-      modelId.includes("qwen3.8-max") || 
-      modelId.includes("glm-5") || 
-      modelId.includes("grok") || 
-      modelId.includes("kimi") || 
-      modelId.includes("gpt-5")
-    ) {
-      modelLevel = 1;
-    }
-    
-    // Pro Models
-    if (
-      modelId.includes("opus") || 
-      modelId.includes("pro") || 
-      modelId.includes("gpt-6")
-    ) {
-      modelLevel = 2;
-    }
+    if (MODELS[modelKey].badge === "Premium") modelLevel = 1;
+    if (MODELS[modelKey].badge === "Pro") modelLevel = 2;
     
     return userLevel >= modelLevel;
   }
@@ -1001,23 +971,23 @@
         document.getElementById("dev-section").style.display = "block";
         document.getElementById("pdf-section").style.display = "block";
         document.getElementById("btn-voice").style.display = "flex";
-        
         document.getElementById("btn-open-bug-report-user").style.display = "none";
+        
+        // TAMPILKAN DROPDOWN HANYA UNTUK DEV
+        document.getElementById("manual-model-container").style.display = "block";
+        document.getElementById("model-sub-header").style.display = "flex";
+        document.getElementById("btn-save-model-choice").style.display = "block";
         
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
         document.getElementById("input-api-key").value = globalApi.apiKey || "";
         document.getElementById("input-base-url").value = globalApi.baseUrl || "https://kunciai.id/v1";
-        
-        document.getElementById("manual-model-container").style.display = "block";
-        document.getElementById("model-sub-header").style.display = "flex";
-        document.getElementById("btn-save-model-choice").style.display = "block";
       } else { 
         document.getElementById("dev-section").style.display = "none"; 
         document.getElementById("pdf-section").style.display = "none";
         document.getElementById("btn-voice").style.display = "none";
-        
         document.getElementById("btn-open-bug-report-user").style.display = "flex";
         
+        // SEMBUNYIKAN DROPDOWN UNTUK USER
         document.getElementById("manual-model-container").style.display = "none";
         document.getElementById("model-sub-header").style.display = "none";
         document.getElementById("btn-save-model-choice").style.display = "none";
@@ -1025,14 +995,14 @@
 
       document.getElementById("btn-model-selector").onclick = () => {
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-        tempSelectedModel = globalApi.model || "deepseek-v4-flash";
+        tempSelectedModel = globalApi.model || "milbrav-ai";
         document.getElementById("select-manual-model").value = ""; 
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
       };
 
       const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      updateModelUI(globalApi.model || "deepseek-v4-flash");
+      updateModelUI(globalApi.model || "milbrav-ai");
 
       viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
       if (state.chats && state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
@@ -1044,9 +1014,9 @@
 
   document.getElementById("btn-plus-menu").addEventListener("click", () => document.getElementById("plus-modal").classList.add("active"));
 
-  function updateModelUI(modelId) {
-    let modelData = MODELS[modelId];
-    if (!modelData) { modelData = { name: modelId, desc: "Model kustom dari KunciAI" }; }
+  function updateModelUI(modelKey) {
+    let modelData = MODELS[modelKey];
+    if (!modelData) { modelData = { name: modelKey, desc: "Model kustom dari KunciAI" }; }
     document.getElementById("current-model-name").textContent = modelData.name;
   }
 
@@ -1067,16 +1037,26 @@
          div.style.opacity = "0.6";
       }
 
+      // Tombol Gear (Hanya muncul untuk Dev)
+      let gearIcon = "";
+      if (state.user.isDev) {
+        gearIcon = `<button class="btn-gear" onclick="editModelApiId(event, '${key}')" title="Ubah ID Model KunciAI">⚙️</button>`;
+      }
+
       div.innerHTML = `
         <div class="model-info" style="flex:1;">
           <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
           <p>${m.desc}</p>
         </div>
+        ${gearIcon}
         ${lockIcon}
         <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
       `;
 
-      div.onclick = () => {
+      div.onclick = (e) => {
+        // Mencegah klik jika yang diklik adalah tombol gear
+        if(e.target.closest('.btn-gear')) return;
+
         if (!hasAccess && !state.user.isDev) {
           closeModal('model-modal');
           document.getElementById('upgrade-modal').classList.add('active');
@@ -1104,7 +1084,17 @@
     
     let finalModel = tempSelectedModel;
     const selectValue = document.getElementById("select-manual-model").value;
-    if (selectValue) finalModel = selectValue;
+    
+    // Jika Dev memilih model dari dropdown KunciAI, langsung timpa apiId-nya (Buat tes)
+    if (selectValue) {
+       finalModel = selectValue;
+       let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+       gApi.model = finalModel;
+       localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+       updateModelUI(finalModel);
+       closeModal("model-modal");
+       return;
+    }
 
     let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     gApi.model = finalModel;
@@ -1119,13 +1109,7 @@
 
   // Navigasi
   document.getElementById("btn-open-sidebar").addEventListener("click", () => { viewChat.classList.remove("active"); viewSidebar.classList.add("active"); renderHistory(); });
-  
-  document.getElementById("btn-open-profile").addEventListener("click", () => { 
-    viewSidebar.classList.remove("active"); 
-    viewProfile.classList.add("active"); 
-    syncTier(); 
-  });
-  
+  document.getElementById("btn-open-profile").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewProfile.classList.add("active"); syncTier(); });
   document.getElementById("btn-close-profile").addEventListener("click", () => { viewProfile.classList.remove("active"); viewSidebar.classList.add("active"); });
   document.getElementById("btn-new-chat").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); createNewChat(false); });
 
@@ -1233,7 +1217,7 @@
   window.handleFileSelect = function(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
-    if (file.size > 5 * 1024 * 1024) { alert("File terlalu besar. Maksimal 5MB ya bang!"); input.value = ""; return; }
+    if (file.size > 5 * 1024 * 1024) { alert("File terlalu besar. Maksimal 5MB ya bos!"); input.value = ""; return; }
     const reader = new FileReader();
     reader.onload = function(e) {
       currentAttachment = { name: file.name, type: file.type, isText: file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json'), data: e.target.result };
@@ -1321,13 +1305,17 @@
     document.getElementById("chat-messages").appendChild(loadingRow);
 
     try {
-      const modelToUse = globalApi.model || "deepseek-v4-flash";
+      const modelKeyToUse = globalApi.model || "milbrav-ai";
+      
+      // ===== AMBIL ID ASLI DARI MAPPING =====
+      const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : modelKeyToUse;
+      
       const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
 
       const res = await fetch('/api/chat', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: globalApi.apiKey, baseUrl: globalApi.baseUrl, model: modelToUse, messages: apiMessages, webSearch: isWebSearchActive })
+        body: JSON.stringify({ apiKey: globalApi.apiKey, baseUrl: globalApi.baseUrl, model: realApiModelId, messages: apiMessages, webSearch: isWebSearchActive })
       });
       
       if (!res.ok) { const errTxt = await res.text(); throw new Error(`Vercel Error (${res.status}): ${errTxt}`); }
@@ -1371,16 +1359,9 @@
       img.src = base64Str;
       img.onload = () => {
         let canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
+        let width = img.width; let height = img.height;
+        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+        canvas.width = width; canvas.height = height;
         let ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL('image/jpeg', quality));
@@ -1391,31 +1372,16 @@
   document.getElementById("btn-submit-proof").addEventListener("click", () => {
     const fileInput = document.getElementById("proof-file"); 
     if (!fileInput.files.length) return alert("Pilih foto!");
-    
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = async function(e) {
       try {
         const compressedBase64 = await compressImage(e.target.result);
-        
         let requests = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-        requests.push({ 
-          id: "trx_" + Date.now(), 
-          username: state.user.username, 
-          tier: currentSelectedTier, 
-          price: currentSelectedPrice, 
-          proof: compressedBase64, 
-          status: "pending", 
-          date: new Date().toLocaleString("id-ID") 
-        });
-        
+        requests.push({ id: "trx_" + Date.now(), username: state.user.username, tier: currentSelectedTier, price: currentSelectedPrice, proof: compressedBase64, status: "pending", date: new Date().toLocaleString("id-ID") });
         localStorage.setItem("milbrav_payment_requests", JSON.stringify(requests));
-        alert("Bukti berhasil dikirim! Tunggu konfirmasi Dev."); 
-        closeModal("proof-modal"); 
-        fileInput.value = "";
-      } catch (err) {
-        alert("Gagal memproses gambar: " + err.message);
-      }
+        alert("Bukti berhasil dikirim! Tunggu konfirmasi Dev."); closeModal("proof-modal"); fileInput.value = "";
+      } catch (err) { alert("Gagal memproses gambar: " + err.message); }
     }; 
     reader.readAsDataURL(file);
   });
@@ -1451,37 +1417,19 @@
   document.getElementById("btn-logout").addEventListener("click", () => {
     if(!confirm("Yakin mau keluar?")) return;
     saveUserChats(); state.user = null; saveState(); viewChat.classList.remove("active"); viewProfile.classList.remove("active"); viewSidebar.classList.remove("active");
-    appContainer.style.display = "none"; 
-    
-    authContainer.style.display = "none";
-    splashContainer.style.display = "none";
-    landingContainer.style.display = "flex";
-    
+    appContainer.style.display = "none"; authContainer.style.display = "none"; splashContainer.style.display = "none"; landingContainer.style.display = "flex";
     document.getElementById("auth-username").value = ""; document.getElementById("auth-password").value = "";
   });
 
   try {
     loadState();
     if (state.user) { 
-      splashContainer.style.display = "none";
-      landingContainer.style.display = "none";
-      enterApp(); 
+      splashContainer.style.display = "none"; landingContainer.style.display = "none"; enterApp(); 
     } else { 
-      splashContainer.style.display = "flex";
-      landingContainer.style.display = "none";
-      authContainer.style.display = "none";
-      
-      setTimeout(() => {
-        splashContainer.style.display = "none";
-        landingContainer.style.display = "flex";
-      }, 2000); 
+      splashContainer.style.display = "flex"; landingContainer.style.display = "none"; authContainer.style.display = "none";
+      setTimeout(() => { splashContainer.style.display = "none"; landingContainer.style.display = "flex"; }, 2000); 
     }
-  } catch(e) {
-    console.error(e);
-    splashContainer.style.display = "none";
-    landingContainer.style.display = "none";
-    authContainer.style.display = "flex";
-  }
+  } catch(e) { console.error(e); splashContainer.style.display = "none"; landingContainer.style.display = "none"; authContainer.style.display = "flex"; }
 })();
 </script>
 </body>
