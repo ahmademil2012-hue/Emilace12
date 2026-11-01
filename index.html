@@ -546,7 +546,6 @@
   const inputMessage = document.getElementById("input-message");
   const btnSend = document.getElementById("btn-send");
 
-  // ===== PERBAIKAN MUTLAK: SEMUA API ID KOSONG =====
   let MODELS = {
     "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "" },
     "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "" },
@@ -579,7 +578,6 @@
     let tz = "WIB";
     if (offset <= -480) tz = "WITA";
     if (offset <= -540) tz = "WIT";
-    
     const jam = String(now.getHours()).padStart(2, '0');
     const menit = String(now.getMinutes()).padStart(2, '0');
     return `${jam}:${menit} ${tz}`;
@@ -809,7 +807,8 @@
       document.getElementById("btn-model-selector").onclick = () => {
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
         tempSelectedModel = globalApi.model || "milbrav-ai";
-        document.getElementById("select-manual-model").value = ""; 
+        // Tampilkan model yang sedang terpasang di dropdown
+        document.getElementById("select-manual-model").value = MODELS[tempSelectedModel].apiId || ""; 
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
       };
@@ -862,6 +861,8 @@
         }
         if (state.user.isDev) {
           tempSelectedModel = key;
+          // Update dropdown saat ganti model
+          document.getElementById("select-manual-model").value = MODELS[key].apiId || "";
           renderModelList(); 
         } else {
           let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
@@ -877,24 +878,25 @@
 
   document.getElementById("btn-save-model-choice").addEventListener("click", () => {
     if (!state.user.isDev) return; 
+    
     const selectValue = document.getElementById("select-manual-model").value;
-    if (selectValue && tempSelectedModel) {
+    
+    if (selectValue) {
       MODELS[tempSelectedModel].apiId = selectValue;
       saveModelMapping();
-      alert(`Berhasil! ${MODELS[tempSelectedModel].name} sekarang menggunakan AI: ${selectValue}`);
-      document.getElementById("select-manual-model").value = "";
-      let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      gApi.model = tempSelectedModel;
-      localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-      updateModelUI(tempSelectedModel);
-      closeModal("model-modal");
-    } else {
-      let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      gApi.model = tempSelectedModel;
-      localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-      updateModelUI(tempSelectedModel);
-      closeModal("model-modal");
     }
+    
+    if (!MODELS[tempSelectedModel].apiId) {
+      alert(`Bos, Anda belum memilih Model KunciAI untuk "${MODELS[tempSelectedModel].name}". Silakan pilih dari dropdown!`);
+      return;
+    }
+
+    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    gApi.model = tempSelectedModel;
+    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+    updateModelUI(tempSelectedModel);
+    closeModal("model-modal");
+    alert(`Berhasil disimpan! ${MODELS[tempSelectedModel].name} menggunakan: ${MODELS[tempSelectedModel].apiId}`);
   });
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
@@ -1071,10 +1073,8 @@
 
     try {
       const modelKeyToUse = globalApi.model || "milbrav-ai";
-      
       const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : "";
       
-      // CEK JIKA DEV BELUM MENGATUR MODEL AI
       if (!realApiModelId) {
         document.getElementById("loading-row").remove();
         alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, pilih Milbrav tersebut, dan tentukan Model KunciAI-nya di dropdown atas.`);
