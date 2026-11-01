@@ -83,7 +83,9 @@
   .msg-avatar.user { background: #444; color: white; }
   .msg-content { font-size: 16px; line-height: 1.6; white-space: pre-wrap; max-width: 100%; word-wrap: break-word; }
   .message.user .msg-content { background: var(--bg-hover); padding: 12px 16px; border-radius: 20px; max-width: 85%; }
-  .msg-image { max-width: 100%; border-radius: 12px; margin-top: 10px; display: block; }
+  
+  /* TAMPILAN GAMBAR DI CHAT */
+  .msg-image { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 10px; display: block; object-fit: contain; }
 
   .chat-input-area { padding: 10px 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); flex-shrink: 0; }
   .chat-input-box { background: var(--bg-input-box); border: 1px solid #333; border-radius: 24px; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
@@ -178,6 +180,35 @@
   .dev-request-card img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin: 10px 0; background: #000; }
 
   .bug-time-text { color: #888; font-size: 12px; margin-top: 6px; font-weight: 500; }
+
+  /* ===== FITUR CAROUSEL UPGRADE BARU ===== */
+  #upgrade-carousel-modal { background: #000; z-index: 2000; flex-direction: column; }
+  .carousel-header { position: relative; text-align: center; padding: 40px 20px 10px; }
+  .carousel-header .close-btn { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #aaa; }
+  .star-icon { width: 50px; height: 50px; margin: 0 auto 15px; color: #3b82f6; }
+  .carousel-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+  .carousel-sub { color: #aaa; font-size: 15px; margin-bottom: 30px; }
+  
+  .carousel-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; width: 100%; max-width: 500px; margin: 0 auto; padding-bottom: 20px; scrollbar-width: none; }
+  .carousel-container::-webkit-scrollbar { display: none; }
+  
+  .tier-card { flex: 0 0 100%; scroll-snap-align: center; padding: 0 20px; display: flex; flex-direction: column; }
+  .feature-table { width: 100%; background: #0a0a0a; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+  .feature-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1a1a1a; font-size: 14px; }
+  .feature-row:last-child { border-bottom: none; }
+  .feature-row .f-name { color: #ddd; flex: 1; padding-right: 10px; line-height: 1.3; }
+  .feature-row .f-free { color: #888; width: 50px; text-align: center; }
+  .feature-row .f-paid { color: #3b82f6; width: 50px; text-align: center; font-weight: bold; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+  .header-row h4 { font-size: 16px; color: #fff; }
+  .header-row span { font-size: 14px; font-weight: bold; color: #3b82f6; }
+  
+  .btn-upgrade-tier { width: 100%; background: white; color: black; font-size: 16px; font-weight: 700; padding: 16px; border-radius: 30px; text-align: center; }
+  .footer-text { text-align: center; color: #666; font-size: 11px; margin-top: 15px; line-height: 1.5; }
+  
+  .swipe-dots { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #333; transition: 0.3s; }
+  .dot.active { background: #fff; width: 20px; border-radius: 10px; }
 </style>
 </head>
 <body>
@@ -332,7 +363,6 @@
     <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
     
-    <!-- KHUSUS DEV: DROPDOWN + MANUAL INPUT -->
     <div class="manual-input-container" id="manual-model-container">
       <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
         Pilih Model KunciAI (Khusus Dev)
@@ -462,6 +492,82 @@
   </div>
 </div>
 
+<!-- ================= MODAL CAROUSEL UPGRADE BARU ================= -->
+<div id="upgrade-carousel-modal" class="modal-overlay">
+  <div class="carousel-header">
+    <button class="close-btn" onclick="closeModal('upgrade-carousel-modal')">✕</button>
+    <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+    <h1 class="carousel-title" id="carousel-title-text">Dapatkan Milbrav AI Premium</h1>
+    <p class="carousel-sub" id="carousel-sub-text">Lebih banyak ruang untuk menulis, belajar, dan berkreasi</p>
+  </div>
+
+  <div class="carousel-container" id="tier-carousel">
+    
+    <!-- Card 1: PREMIUM -->
+    <div class="tier-card">
+      <div class="feature-table">
+        <div class="header-row">
+          <h4>Fitur</h4>
+          <span style="color:#888;">Gratis</span>
+          <span style="color:#3b82f6;">Premium</span>
+        </div>
+        <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak pembuatan gambar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Lebih banyak obrolan suara</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Memori lebih panjang</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+      </div>
+      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Premium', 17000)">Update Akun Baru</button>
+      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
+    </div>
+
+    <!-- Card 2: PRO -->
+    <div class="tier-card">
+      <div class="feature-table">
+        <div class="header-row">
+          <h4>Fitur</h4>
+          <span style="color:#888;">Gratis</span>
+          <span style="color:#3b82f6;">Pro</span>
+        </div>
+        <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Model canggih dan memori</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Pembuatan gambar kualitas lebih tinggi</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Otomatisasi tugas terjadwal</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Codex untuk pemrograman</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+      </div>
+      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro', 25000)">Update Akun Baru</button>
+      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
+    </div>
+
+    <!-- Card 3: PRO+ -->
+    <div class="tier-card">
+      <div class="feature-table">
+        <div class="header-row">
+          <h4>Fitur</h4>
+          <span style="color:#888;">Gratis</span>
+          <span style="color:#3b82f6;">Pro+</span>
+        </div>
+        <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Model canggih dan memori</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Pembuatan gambar kualitas lebih tinggi</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Otomatisasi tugas terjadwal</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name">Codex untuk pemrograman</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+        <div class="feature-row"><span class="f-name" style="color:#10b981; font-weight:bold;">Pro+ sudah tidak ada limit</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
+      </div>
+      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro+', 45000)">Update Akun Baru</button>
+      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
+    </div>
+
+  </div>
+  
+  <div class="swipe-dots" id="swipe-dots">
+    <div class="dot active" onclick="scrollToCard(0)"></div>
+    <div class="dot" onclick="scrollToCard(1)"></div>
+    <div class="dot" onclick="scrollToCard(2)"></div>
+  </div>
+</div>
+
 <script>
 (function() {
   "use strict";
@@ -560,6 +666,36 @@
     }
   };
 
+  window.scrollToCard = function(index) {
+    const container = document.getElementById("tier-carousel");
+    const cards = container.querySelectorAll(".tier-card");
+    if(cards[index]) {
+        cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
+
+  document.getElementById("tier-carousel").addEventListener("scroll", function() {
+    const scrollLeft = this.scrollLeft;
+    const width = this.clientWidth;
+    const activeIndex = Math.round(scrollLeft / width);
+    
+    const dots = document.querySelectorAll(".dot");
+    dots.forEach((dot, i) => {
+      if(i === activeIndex) dot.classList.add("active");
+      else dot.classList.remove("active");
+    });
+
+    const titles = ["Dapatkan Milbrav AI Premium", "Dapatkan Milbrav AI Pro", "Dapatkan Milbrav AI Pro+"];
+    const subs = ["Lebih banyak ruang untuk menulis, belajar, dan berkreasi", "AI yang dipersonalisasi untuk keseharian dan pekerjaan", "Bebas batas. Eksplorasi tanpa henti untuk profesional."];
+    document.getElementById("carousel-title-text").textContent = titles[activeIndex] || titles[0];
+    document.getElementById("carousel-sub-text").textContent = subs[activeIndex] || subs[0];
+  });
+
+  window.pilihPaketUpgrade = function(tier, harga) {
+      closeModal('upgrade-carousel-modal');
+      showPayment(tier, harga);
+  };
+
   function getWaktuLapor() {
     const now = new Date();
     const offset = now.getTimezoneOffset(); 
@@ -640,7 +776,7 @@
   }
 
   window.checkPremium = function(featureName) {
-    if (state.user.tier === "free" && !state.user.isDev) { closeModal('plus-modal'); document.getElementById('upgrade-modal').classList.add('active'); return; }
+    if (state.user.tier === "free" && !state.user.isDev) { closeModal('plus-modal'); document.getElementById('upgrade-carousel-modal').classList.add('active'); return; }
     if (featureName === 'Pencarian Web') {
       isWebSearchActive = !isWebSearchActive;
       const toggle = document.getElementById('toggle-web-search');
@@ -687,7 +823,12 @@
     let y = 30;
     chat.messages.forEach(m => {
       const role = m.role === 'user' ? 'Anda' : 'Milbrav AI';
-      const cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+      let cleanContent = "";
+      if (Array.isArray(m.content)) {
+          cleanContent = m.content.map(c => c.text || '[Gambar/FILE]').join(' ');
+      } else {
+          cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+      }
       const text = `${role}: ${cleanContent}`; const splitText = doc.splitTextToSize(text, 180);
       if (y + (splitText.length * 7) > 280) { doc.addPage(); y = 10; }
       doc.text(splitText, 10, y); y += (splitText.length * 7) + 5;
@@ -716,7 +857,12 @@
       html += `<div style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;"><h4 style="color: #60a5fa; margin-bottom: 8px; font-size: 14px;">📁 ${chat.title}</h4>`;
       chat.messages.forEach(m => {
         const role = m.role === 'user' ? 'User' : 'AI'; const color = m.role === 'user' ? '#10b981' : '#ececec';
-        const cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+        let cleanContent = "";
+        if (Array.isArray(m.content)) {
+            cleanContent = m.content.map(c => c.text || '[Gambar/FILE]').join(' ');
+        } else {
+            cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+        }
         html += `<div style="margin-bottom: 8px; font-size: 13px; line-height: 1.4;"><span style="color: ${color}; font-weight: bold;">${role}:</span> <span style="color: #aaa; white-space: pre-wrap;">${cleanContent}</span></div>`;
       });
       html += `</div>`;
@@ -792,14 +938,12 @@
         document.getElementById("btn-save-model-choice").style.display = "none";
       }
 
-      // OTOMATIS PILIH MODEL BERDASARKAN TIER (Untuk user biasa)
       let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
       if (!state.user.isDev) {
           const tier = (state.user.tier || "free").toLowerCase();
           if (tier === "free") gApi.model = "milbrav-ai";
           else if (tier === "premium") gApi.model = "milbrav-rose";
           else if (tier === "pro" || tier === "proplus") gApi.model = "milbrav-walk";
-          
           localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
       }
 
@@ -807,7 +951,6 @@
         tempSelectedModel = gApi.model || "milbrav-ai";
         document.getElementById("select-manual-model").innerHTML = '<option value="">-- Tarik Otomatis / Ketik Manual --</option>';
         document.getElementById("manual-model-text").value = ""; 
-        
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
       };
@@ -842,7 +985,6 @@
          div.style.opacity = "0.6";
       }
 
-      // KHUSUS DEV: TAMPILKAN MODEL KUNCIAI DI BAWAH NAMA
       let descHtml = m.desc;
       if (state.user.isDev) {
           descHtml = `Model KunciAI: <span style="color:#10b981; font-weight:bold;">${m.apiId || 'Belum diatur'}</span>`;
@@ -860,12 +1002,11 @@
       div.onclick = () => {
         if (!hasAccess && !state.user.isDev) {
           closeModal('model-modal');
-          document.getElementById('upgrade-modal').classList.add('active');
+          document.getElementById('upgrade-carousel-modal').classList.add('active');
           return;
         }
         if (state.user.isDev) {
           tempSelectedModel = key;
-          // Kalau dev klik, isi otomatis input text dengan apiId yang sekarang
           document.getElementById("manual-model-text").value = MODELS[key].apiId || "";
           document.getElementById("select-manual-model").value = "";
           renderModelList(); 
@@ -889,7 +1030,6 @@
     
     let finalModelId = "";
     
-    // Prioritas: Manual input kalau diisi, kalau nggak pakai dropdown
     if (manualValue) {
       finalModelId = manualValue;
     } else if (selectValue) {
@@ -1005,29 +1145,71 @@
   function renderChat() {
     const chat = state.chats.find(c => c.id === state.activeChatId);
     const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
+    
     chat.messages.forEach(m => {
       const row = document.createElement("div"); row.className = "message " + m.role;
-      let contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
-      if (m.role === 'user') { row.innerHTML = `<div class="msg-content">${contentHtml}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`; } 
-      else { row.innerHTML = `<div class="msg-content" style="padding-left: 0;">${contentHtml}</div>`; }
+      let contentHtml = "";
+
+      // CEK JIKA FORMATNYA ARRAY (MULTIMODAL / GAMBAR)
+      if (Array.isArray(m.content)) {
+          m.content.forEach(part => {
+              if (part.type === "text") {
+                  contentHtml += `<div>${part.text.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">')}</div>`;
+              } else if (part.type === "image_url") {
+                  contentHtml += `<img src="${part.image_url.url}" class="msg-image" style="max-width: 200px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;">`;
+              }
+          });
+      } else {
+          contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
+      }
+
+      if (m.role === 'user') { 
+          row.innerHTML = `<div class="msg-content">${contentHtml}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`; 
+      } else { 
+          row.innerHTML = `<div class="msg-content" style="padding-left: 0;">${contentHtml}</div>`; 
+      }
       box.appendChild(row);
     });
     box.scrollTop = box.scrollHeight;
   }
 
-  window.handleFileSelect = function(input) {
+  // FITUR BARU: KOMPRESI GAMBAR & BACA FILE
+  window.handleFileSelect = async function(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
     if (file.size > 5 * 1024 * 1024) { alert("File terlalu besar. Maksimal 5MB ya bos!"); input.value = ""; return; }
+    
     const reader = new FileReader();
-    reader.onload = function(e) {
-      currentAttachment = { name: file.name, type: file.type, isText: file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json'), data: e.target.result };
-      document.getElementById("attachment-preview").style.display = "flex";
-      document.getElementById("attachment-name").textContent = file.name;
-      updateSendButtonState(); closeModal('plus-modal'); input.value = ""; 
-    };
-    if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) reader.readAsText(file);
-    else reader.readAsDataURL(file);
+    
+    // JIKA FILE NYA GAMBAR
+    if (file.type.startsWith('image/')) {
+        reader.onload = async function(e) {
+            // Kompres dulu biar ringan
+            const compressed = await compressImage(e.target.result, 800, 0.8);
+            currentAttachment = { name: file.name, type: file.type, isText: false, data: compressed };
+            document.getElementById("attachment-preview").style.display = "flex";
+            document.getElementById("attachment-name").textContent = "Gambar: " + file.name;
+            updateSendButtonState();
+            closeModal('plus-modal'); input.value = ""; 
+        };
+        reader.readAsDataURL(file);
+    } 
+    // JIKA FILE NYA TEKS / DOKUMEN
+    else {
+        reader.onload = function(e) {
+            currentAttachment = { name: file.name, type: file.type, isText: true, data: e.target.result };
+            document.getElementById("attachment-preview").style.display = "flex";
+            document.getElementById("attachment-name").textContent = "Teks: " + file.name;
+            updateSendButtonState();
+            closeModal('plus-modal'); input.value = ""; 
+        };
+        if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
+            reader.readAsText(file);
+        } else {
+            alert("Untuk saat ini hanya mendukung gambar dan file teks (txt/csv/json)");
+            input.value = "";
+        }
+    }
   };
 
   window.removeAttachment = function() {
@@ -1058,7 +1240,10 @@
     let usageToday = parseInt(localStorage.getItem(usageKey) || "0", 10);
     const limit = getDailyLimit();
 
-    if (limit !== Infinity && usageToday >= limit) return alert(`Kuota harian paket ${state.user.tier.toUpperCase()} Anda sudah habis (${limit} pesan/hari). Silakan upgrade paket.`);
+    if (limit !== Infinity && usageToday >= limit) {
+        document.getElementById('upgrade-carousel-modal').classList.add('active');
+        return;
+    }
 
     const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     if (!globalApi.apiKey) {
@@ -1066,15 +1251,26 @@
     }
 
     const chat = state.chats.find(c => c.id === state.activeChatId);
-    let finalMessage = text;
+    
+    // FORMAT PESAN BARU UNTUK MENDETEKSI GAMBAR/TEKS
+    let userMessageContent = text;
+    
     if (currentAttachment) {
-      if (currentAttachment.isText) finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
-      else finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nPesan User:\n${text}`;
+        if (currentAttachment.isText) {
+            userMessageContent = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
+        } else {
+            // FORMAT OPENAI VISION API (GAMBAR)
+            userMessageContent = [
+                { type: "text", text: text || "Tolong jelaskan gambar ini." },
+                { type: "image_url", image_url: { url: currentAttachment.data } }
+            ];
+        }
     }
 
-    chat.messages.push({ role: "user", content: finalMessage });
+    chat.messages.push({ role: "user", content: userMessageContent });
     removeAttachment();
-    if (chat.title === "Obrolan Baru") chat.title = (text || "Lampiran").substring(0, 20) + "...";
+    
+    if (chat.title === "Obrolan Baru") chat.title = (text || (currentAttachment ? "Gambar" : "Lampiran")).substring(0, 20) + "...";
     document.getElementById("chat-title-header").textContent = chat.title;
     
     const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
@@ -1097,6 +1293,7 @@
         return;
       }
       
+      // MAPPING MESSAGES KE FORMAT API
       const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
 
       const res = await fetch('/api/chat', {
@@ -1130,14 +1327,14 @@
     alert("API Key & Base URL berhasil disimpan!");
   });
 
-  document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-modal").classList.add("active"));
+  document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-carousel-modal").classList.add("active"));
   document.getElementById("btn-sudah-bayar").addEventListener("click", () => { closeModal("payment-modal"); document.getElementById("proof-modal").classList.add("active"); });
   let currentSelectedTier = ""; let currentSelectedPrice = 0;
   window.showPayment = function(tier, price) {
     currentSelectedTier = tier; currentSelectedPrice = price;
     document.getElementById("pay-tier-name").textContent = "Paket " + tier;
     document.getElementById("pay-total-price").textContent = "Rp " + price.toLocaleString('id-ID');
-    closeModal("upgrade-modal"); document.getElementById("payment-modal").classList.add("active");
+    closeModal("upgrade-carousel-modal"); document.getElementById("payment-modal").classList.add("active");
   };
   
   function compressImage(base64Str, maxWidth = 800, quality = 0.7) {
