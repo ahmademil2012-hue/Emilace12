@@ -2,7 +2,8 @@
 <html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<!-- TAMBAHAN: viewport-fit=cover agar layar HP menyesuaikan lengkungan/gestur -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Milbrav AI</title>
 <!-- Library buat Export PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,7 +18,21 @@
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; width: 100%; overflow: hidden; font-family: var(--font-main); background-color: var(--bg-main); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+  
+  /* PERBAIKAN: Gunakan 100dvh untuk mobile browser & position fixed agar tidak bisa di-scroll halamannya */
+  html, body { 
+    height: 100%; 
+    height: 100dvh; 
+    width: 100%; 
+    overflow: hidden; 
+    position: fixed; 
+    inset: 0;
+    font-family: var(--font-main); 
+    background-color: var(--bg-main); 
+    color: var(--text-primary); 
+    -webkit-font-smoothing: antialiased; 
+  }
+  
   button { font-family: inherit; cursor: pointer; border: none; background: transparent; color: inherit; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
@@ -86,13 +101,21 @@
   .btn-back-landing { margin-top: 20px; color: var(--text-muted); font-size: 13px; text-decoration: underline; }
 
   /* LAYOUT & SIDEBAR */
-  #app-container { display: none; height: 100vh; width: 100%; position: relative; z-index: 10; }
-  #view-sidebar { position: absolute; inset: 0; background: var(--bg-sidebar); display: none; flex-direction: column; z-index: 10; }
+  /* PERBAIKAN: Gunakan 100% height agar menyesuaikan container utama */
+  #app-container { display: none; height: 100%; width: 100%; position: relative; z-index: 10; }
+  
+  #view-sidebar { 
+    position: absolute; inset: 0; background: var(--bg-sidebar); 
+    display: none; flex-direction: column; z-index: 10; 
+  }
   #view-sidebar.active { display: flex; }
   .sidebar-header { padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
   .sidebar-header h1 { font-size: 22px; font-weight: 600; }
   .divider { height: 1px; background: var(--border-color); margin: 10px 20px; }
-  .sidebar-history { flex: 1; overflow-y: auto; padding: 0 12px; }
+  
+  /* PERBAIKAN: min-height: 0 mencegah flexbox mendorong footer ke luar layar */
+  .sidebar-history { flex: 1; overflow-y: auto; min-height: 0; padding: 0 12px; }
+  
   .history-item-wrapper { position: relative; overflow: hidden; margin-bottom: 4px; border-radius: var(--radius-item); }
   .history-actions { position: absolute; top: 0; right: 0; bottom: 0; width: 100px; display: flex; z-index: 1; }
   .btn-action { width: 50px; display: flex; align-items: center; justify-content: center; color: white; }
@@ -100,17 +123,26 @@
   .btn-del { background: #e74c3c; }
   .history-item-content { background: var(--bg-sidebar); padding: 12px; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; position: relative; z-index: 2; transition: transform 0.2s, background 0.2s; user-select: none; }
   .history-item-content:hover, .history-item-content.active { background: var(--bg-hover); }
-  .sidebar-bottom { padding: 16px 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  
+  /* PERBAIKAN: Padding bawah diberi jarak aman untuk gesture HP */
+  .sidebar-bottom { 
+    padding: 16px 20px; 
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)); 
+    display: flex; align-items: center; justify-content: space-between; 
+  }
   .btn-new-chat-pill { display: flex; align-items: center; gap: 8px; background: var(--accent-blue); color: white; padding: 14px 20px; border-radius: 24px; font-size: 16px; font-weight: 600; }
   .btn-profile { width: 48px; height: 48px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
 
   /* CHAT VIEW */
   #view-chat { position: absolute; inset: 0; background: var(--bg-main); display: none; flex-direction: column; z-index: 20; }
   #view-chat.active { display: flex; }
-  .chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+  .chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .chat-header h2 { font-size: 18px; font-weight: 600; }
   .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 10px 20px 20px; }
+  
+  /* PERBAIKAN: min-height: 0 */
+  .chat-messages { flex: 1; overflow-y: auto; min-height: 0; padding: 10px 20px 20px; }
+  
   .message { margin-bottom: 24px; display: flex; gap: 12px; }
   .message.user { flex-direction: row-reverse; }
   .msg-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
@@ -120,7 +152,12 @@
   .msg-image { max-width: 100%; border-radius: 12px; margin-top: 10px; display: block; }
 
   /* INPUT BOX */
-  .chat-input-area { padding: 10px 16px 24px; }
+  /* PERBAIKAN: Padding aman bawah */
+  .chat-input-area { 
+    padding: 10px 16px; 
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)); 
+    flex-shrink: 0;
+  }
   .chat-input-box { background: var(--bg-input-box); border: 1px solid #333; border-radius: 24px; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
   #attachment-preview { display: none; padding: 8px 12px; background: var(--bg-icon); border-radius: 8px; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; align-items: center; justify-content: space-between; border: 1px solid #444; }
   #attachment-preview span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
@@ -138,7 +175,7 @@
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
   /* PROFILE */
-  #view-profile { position: absolute; inset: 0; background: var(--bg-main); z-index: 30; display: none; flex-direction: column; overflow-y: auto; }
+  #view-profile { position: absolute; inset: 0; background: var(--bg-main); z-index: 30; display: none; flex-direction: column; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
   #view-profile.active { display: flex; }
   .profile-header { padding: 16px 20px; display: flex; }
   .btn-back { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; }
@@ -162,7 +199,7 @@
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
   .modal-overlay.active { display: flex; }
   .modal-overlay.center { align-items: center; }
-  .bottom-sheet { background: var(--bg-input-box); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+  .bottom-sheet { background: var(--bg-input-box); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .sheet-header { display: flex; align-items: center; margin-bottom: 12px; position: relative; }
   .sheet-header h3 { flex: 1; text-align: center; font-size: 18px; font-weight: 600; }
@@ -199,7 +236,7 @@
   .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: #333; color: #ccc; font-weight: 600; }
   .badge.pro { background: #3b82f6; color: white; }
 
-  .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 90vh; overflow-y: auto; margin: auto; }
+  .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 85vh; overflow-y: auto; margin: auto; }
   .modal-content h3 { margin-bottom: 16px; font-size: 20px; text-align: center; }
   .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 10px; text-align: center; cursor: pointer; }
   .modal-btn.primary { background: white; color: black; }
@@ -554,7 +591,7 @@
   // ===== FUNGSI WAKTU (WIB/WITA/WIT) =====
   function getWaktuLapor() {
     const now = new Date();
-    const offset = now.getTimezoneOffset(); // dalam menit
+    const offset = now.getTimezoneOffset(); 
     let tz = "WIB";
     if (offset <= -480) tz = "WITA";
     if (offset <= -540) tz = "WIT";
@@ -615,7 +652,6 @@
       container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada laporan bug dari user.</p>";
     } else {
       container.innerHTML = "";
-      // Urutkan dari yang terbaru
       bugReports.reverse().forEach(bug => {
         const div = document.createElement("div");
         div.className = "dev-request-card";
@@ -669,9 +705,9 @@
     else if (userTier === "proplus") userLevel = 3;
     
     let modelLevel = 0;
-    if (modelId === "claude-sonnet-4.6") modelLevel = 1; // Premium
-    else if (modelId === "claude-opus-4.6") modelLevel = 2; // Pro
-    else if (modelId === "claude-opus-4.8") modelLevel = 2; // Pro
+    if (modelId === "claude-sonnet-4.6") modelLevel = 1;
+    else if (modelId === "claude-opus-4.6") modelLevel = 2;
+    else if (modelId === "claude-opus-4.8") modelLevel = 2;
     
     return userLevel >= modelLevel;
   }
@@ -896,7 +932,6 @@
         document.getElementById("pdf-section").style.display = "block";
         document.getElementById("btn-voice").style.display = "flex";
         
-        // Sembunyikan laporan bug user, Tampilkan menu Dev
         document.getElementById("btn-open-bug-report-user").style.display = "none";
         
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
@@ -911,7 +946,6 @@
         document.getElementById("pdf-section").style.display = "none";
         document.getElementById("btn-voice").style.display = "none";
         
-        // Tampilkan laporan bug user
         document.getElementById("btn-open-bug-report-user").style.display = "flex";
         
         document.getElementById("manual-model-container").style.display = "none";
