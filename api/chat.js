@@ -1,12 +1,12 @@
-// Tambahkan ini agar batas waktu di Vercel lebih lama (Jika paket Pro)
-// export const config = { maxDuration: 60 };
-
 export default async function handler(req, res) {
-  // 1. Set CORS
+  // 1. Set CORS biar aman dari blokiran browser
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+  );
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -17,6 +17,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // 2. Ambil data dari Frontend (HTML)
   const { apiKey, baseUrl, model, messages, webSearch } = req.body;
 
   if (!apiKey) {
@@ -25,35 +26,40 @@ export default async function handler(req, res) {
 
   let finalMessages = [...messages];
 
-  // 2. FITUR PENCARIAN WEB (Dengan Timeout Anti-Crash Vercel)
+  // 3. FITUR PENCARIAN WEB (Dengan Timeout Anti-Crash Vercel)
   if (webSearch && messages.length > 0) {
     try {
       const lastUserMsg = messages[messages.length - 1].content;
+      
+      // Pakai Jina AI Reader untuk cari di DuckDuckGo
       const searchUrl = `https://r.jina.ai/https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastUserMsg)}`;
       
-      // Timeout 5 detik (5000ms) untuk mencegah Vercel timeout 10 detik
+      // Timeout 5 detik (5000ms) untuk mencegah Vercel timeout 10 detik (Error 504)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const searchRes = await fetch(searchUrl, { signal: controller.signal });
-      clearTimeout(timeoutId); // Hentikan timer jika selesai
+      clearTimeout(timeoutId); // Hentikan timer jika pencarian selesai
 
       const searchText = await searchRes.text();
-      const context = searchText.substring(0, 4000); // Batasi token
       
+      // Batasi teks biar ga kebablasan token
+      const context = searchText.substring(0, 4000);
+      
+      // Sisipkan hasil pencarian sebagai pesan "System"
       finalMessages.unshift({
         role: "system",
-        content: `Kamu adalah asisten AI. Berikut adalah hasil pencarian web untuk "${lastUserMsg}":\n\n${context}\n\nJawablah pertanyaan user berdasarkan informasi di atas.`
+        content: `Kamu adalah asisten AI. Berikut adalah hasil pencarian web untuk "${lastUserMsg}":\n\n${context}\n\nJawablah pertanyaan user berdasarkan informasi di atas. Jika tidak ada di atas, jawab dengan pengetahuanmu.`
       });
     } catch (e) {
       console.error("Gagal mencari di web (Timeout/Error):", e.message);
-      // Jika gagal search, biarkan saja lanjut ke AI tanpa context web
+      // Kalau gagal nyari, lanjut aja tanpa web search
     }
   }
 
-  // 3. KIRIM KE API KUNCIAI
+  // 4. KIRIM KE API KUNCIAI
   try {
-    const cleanBaseUrl = baseUrl.replace(/\/+$/, ''); 
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, ''); // Hapus slash di akhir
     const targetUrl = `${cleanBaseUrl}/chat/completions`;
 
     const response = await fetch(targetUrl, {
@@ -65,7 +71,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: model,
         messages: finalMessages,
-        stream: false 
+        stream: false // Matikan stream agar stabil di Vercel
       })
     });
 
@@ -82,7 +88,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: `Format bukan JSON: ${dataText.substring(0, 50)}` });
     }
 
-    // 4. Kirim balik jawaban AI ke Frontend
+    // 5. Kirim balik jawaban AI ke Frontend
     res.status(200).json(dataJson);
 
   } catch (error) {
