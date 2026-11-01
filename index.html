@@ -172,10 +172,6 @@
   .model-item.selected .model-check { display: block; }
   .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: #333; color: #ccc; font-weight: 600; }
   .badge.pro { background: #3b82f6; color: white; }
-  
-  /* GEAR ICON UNTUK DEV */
-  .btn-gear { background: #2c2c2e; border-radius: 6px; padding: 6px 8px; font-size: 14px; color: #ccc; cursor: pointer; margin-left: 10px; }
-  .btn-gear:hover { background: #444; }
 
   .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 85vh; overflow-y: auto; margin: auto; }
   .modal-content h3 { margin-bottom: 16px; font-size: 20px; text-align: center; }
@@ -351,7 +347,7 @@
     <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
     
-    <!-- KHUSUS DEV -->
+    <!-- KHUSUS DEV: PILIH MODEL ASLI -->
     <div class="manual-input-container" id="manual-model-container">
       <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:block; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
       <select id="select-manual-model" class="custom-select">
@@ -573,24 +569,12 @@
   const inputMessage = document.getElementById("input-message");
   const btnSend = document.getElementById("btn-send");
 
-  // ===== FITUR MODEL MAPPING (BISA DIUBAH DEV) =====
+  // ===== HANYA ADA MODEL MILBRAV =====
   let MODELS = {
-    "milbrav-opus-5": { name: "Claude Opus 5", desc: "Kecerdasan tertinggi", badge: "Pro", apiId: "claude-opus-5" },
-    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "claude-opus-4.8" },
-    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "claude-opus-4.6" },
-    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "claude-sonnet-4.6" },
-    "milbrav-gpt6": { name: "GPT-6 Luna", desc: "Model masa depan dari OpenAI", badge: "Pro", apiId: "gpt-6-luna" },
-    "milbrav-gpt56": { name: "GPT-5.6 Luna", desc: "Standar pintar & cepat", badge: "Premium", apiId: "gpt-5.6-luna" },
-    "milbrav-gpt54": { name: "GPT-5.4 Mini", desc: "Hemat dan ringan", badge: "Premium", apiId: "gpt-5.4-mini" },
-    "milbrav-deepseek": { name: "DeepSeek V4.1", desc: "Update terbaru paling cepat", badge: "", apiId: "deepseek-v4.1-flash" },
     "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "deepseek-v4-flash" },
-    "milbrav-pro": { name: "DeepSeek V4 Pro", desc: "Penalaran berat", badge: "Pro", apiId: "deepseek-v4-pro" },
-    "milbrav-qwen38": { name: "Qwen 3.8 Max", desc: "Raksasa dari Alibaba", badge: "Premium", apiId: "qwen3.8-max" },
-    "milbrav-qwen37": { name: "Qwen 3.7 Max", desc: "Cepat dan cerdas", badge: "", apiId: "qwen3.7-max" },
-    "milbrav-glm": { name: "GLM 5.3", desc: "Kecerdasan dari Zhipu AI", badge: "Premium", apiId: "glm-5.3" },
-    "milbrav-grok": { name: "Grok 4.7", desc: "Cerdas dan berani dari xAI", badge: "Premium", apiId: "grok-4.7" },
-    "milbrav-kimi": { name: "Kimi K3", desc: "Ahli konteks panjang", badge: "Premium", apiId: "kimi-k3" },
-    "milbrav-minimax": { name: "Minimax M3", desc: "Cepat dan hemat", badge: "", apiId: "minimax-m3" }
+    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "claude-sonnet-4.6" },
+    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "claude-opus-4.6" },
+    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "claude-opus-4.8" }
   };
 
   // Load custom mapping dari LocalStorage jika Dev pernah mengubahnya
@@ -612,22 +596,6 @@
     for (let key in MODELS) { map[key] = MODELS[key].apiId; }
     localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
   }
-
-  // Fungsi ubah API ID via tombol Gear (Khusus Dev)
-  window.editModelApiId = function(e, key) {
-    e.stopPropagation();
-    if (!state.user.isDev) return;
-
-    let currentApiId = MODELS[key].apiId;
-    let newApiId = prompt(`Ubah ID KunciAI untuk "${MODELS[key].name}"\n\nSaat ini: ${currentApiId}\n\n(Masukkan ID persis seperti di dashboard KunciAI)`, currentApiId);
-    
-    if (newApiId && newApiId.trim() !== "") {
-      MODELS[key].apiId = newApiId.trim();
-      saveModelMapping();
-      alert(`Berhasil! ${MODELS[key].name} sekarang menggunakan model backend: ${newApiId}`);
-      renderModelList();
-    }
-  };
 
   // ===== FUNGSI WAKTU (WIB/WITA/WIT) =====
   function getWaktuLapor() {
@@ -1016,10 +984,11 @@
 
   function updateModelUI(modelKey) {
     let modelData = MODELS[modelKey];
-    if (!modelData) { modelData = { name: modelKey, desc: "Model kustom dari KunciAI" }; }
+    if (!modelData) { modelData = { name: "Milbrav AI", desc: "Model kustom" }; }
     document.getElementById("current-model-name").textContent = modelData.name;
   }
 
+  // HANYA MERENDER NAMA MILBRAV (TANPA CLAUDE/GPT DI LIST UI)
   function renderModelList() {
     const container = document.getElementById("model-list-container");
     container.innerHTML = "";
@@ -1037,26 +1006,16 @@
          div.style.opacity = "0.6";
       }
 
-      // Tombol Gear (Hanya muncul untuk Dev)
-      let gearIcon = "";
-      if (state.user.isDev) {
-        gearIcon = `<button class="btn-gear" onclick="editModelApiId(event, '${key}')" title="Ubah ID Model KunciAI">⚙️</button>`;
-      }
-
       div.innerHTML = `
         <div class="model-info" style="flex:1;">
           <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
           <p>${m.desc}</p>
         </div>
-        ${gearIcon}
         ${lockIcon}
         <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
       `;
 
-      div.onclick = (e) => {
-        // Mencegah klik jika yang diklik adalah tombol gear
-        if(e.target.closest('.btn-gear')) return;
-
+      div.onclick = () => {
         if (!hasAccess && !state.user.isDev) {
           closeModal('model-modal');
           document.getElementById('upgrade-modal').classList.add('active');
@@ -1065,7 +1024,6 @@
 
         if (state.user.isDev) {
           tempSelectedModel = key;
-          document.getElementById("select-manual-model").value = ""; 
           renderModelList(); 
         } else {
           let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
@@ -1082,26 +1040,28 @@
   document.getElementById("btn-save-model-choice").addEventListener("click", () => {
     if (!state.user.isDev) return; 
     
-    let finalModel = tempSelectedModel;
     const selectValue = document.getElementById("select-manual-model").value;
     
-    // Jika Dev memilih model dari dropdown KunciAI, langsung timpa apiId-nya (Buat tes)
-    if (selectValue) {
-       finalModel = selectValue;
-       let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-       gApi.model = finalModel;
-       localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-       updateModelUI(finalModel);
-       closeModal("model-modal");
-       return;
+    if (selectValue && tempSelectedModel) {
+      // Dev mengubah API Model untuk Milbrav yang dipilih
+      MODELS[tempSelectedModel].apiId = selectValue;
+      saveModelMapping();
+      alert(`Berhasil! ${MODELS[tempSelectedModel].name} sekarang menggunakan AI: ${selectValue}`);
+      
+      document.getElementById("select-manual-model").value = "";
+      
+      let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+      gApi.model = tempSelectedModel;
+      localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+      updateModelUI(tempSelectedModel);
+      closeModal("model-modal");
+    } else {
+      let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+      gApi.model = tempSelectedModel;
+      localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+      updateModelUI(tempSelectedModel);
+      closeModal("model-modal");
     }
-
-    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    gApi.model = finalModel;
-    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-    
-    updateModelUI(finalModel);
-    closeModal("model-modal");
   });
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
@@ -1307,7 +1267,7 @@
     try {
       const modelKeyToUse = globalApi.model || "milbrav-ai";
       
-      // ===== AMBIL ID ASLI DARI MAPPING =====
+      // AMBIL ID ASLI DARI MAPPING (BISA DIUBAH DEV)
       const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : modelKeyToUse;
       
       const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
