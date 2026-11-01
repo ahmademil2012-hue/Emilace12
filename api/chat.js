@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       const lastUserMsg = messages[messages.length - 1].content;
       const searchUrl = `https://r.jina.ai/https://html.duckduckgo.com/html/?q=${encodeURIComponent(lastUserMsg)}`;
       
+      // Timeout 5 detik (5000ms) untuk mencegah Vercel timeout 10 detik (Error 504)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: `Format bukan JSON: ${dataText.substring(0, 50)}` });
     }
 
+    // 5. Kirim balik jawaban AI ke Frontend
     res.status(200).json(dataJson);
 
   } catch (error) {
