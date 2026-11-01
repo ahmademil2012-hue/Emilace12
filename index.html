@@ -4,12 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Milbrav AI</title>
+<!-- Library buat Export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg-main: #000000; --bg-sidebar: #171717; --bg-card: #212121; --bg-hover: #2f2f2f;
     --bg-input-box: #1c1c1e; --bg-icon: #2c2c2e;
     --text-primary: #ececec; --text-secondary: #b4b4b4; --text-muted: #8e8e8e;
     --border-color: #333333; --accent-blue: #3b82f6; --accent-red: #ef4444; --accent-green: #10b981;
+    --accent-neon: #00d4ff;
     --radius-card: 16px; --radius-item: 12px;
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
@@ -19,21 +22,71 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
 
-  /* AUTH */
-  #auth-container { position: fixed; inset: 0; background: var(--bg-main); display: flex; align-items: center; justify-content: center; z-index: 500; }
+  /* ===== 1. SPLASH SCREEN ===== */
+  #splash-container {
+    position: fixed; inset: 0; z-index: 3000;
+    background: radial-gradient(circle at center, #001f3f 0%, #000000 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .splash-logo {
+    width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--accent-neon);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    margin-bottom: 20px;
+    animation: pulse-logo 1.5s infinite alternate;
+  }
+  @keyframes pulse-logo {
+    from { transform: scale(1); box-shadow: 0 0 20px rgba(0,212,255,0.4); }
+    to { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,212,255,0.8); }
+  }
+  .spinner {
+    width: 30px; height: 30px; border: 3px solid rgba(0, 212, 255, 0.3);
+    border-top: 3px solid var(--accent-neon); border-radius: 50%;
+    animation: spin 1s linear infinite; margin-top: 10px;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .skip-text { margin-top: 20px; color: #888; font-size: 14px; animation: blink 1.5s infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ===== 2. LANDING PAGE ===== */
+  #landing-container {
+    position: fixed; inset: 0; z-index: 2000;
+    background: radial-gradient(circle at center, #001f3f 0%, #000000 100%);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 20px; overflow-y: auto;
+  }
+  .landing-logo {
+    width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--accent-neon);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    margin-bottom: 20px;
+  }
+  .landing-title { font-size: 36px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(90deg, #00d4ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;}
+  .landing-sub { color: var(--text-secondary); font-size: 16px; margin-bottom: 30px; font-weight: 500; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; margin-bottom: 40px; }
+  .feature-item { background: rgba(255,255,255,0.05); padding: 16px 8px; border-radius: 16px; border: 1px solid rgba(0,212,255,0.2); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .feature-item svg { width: 24px; height: 24px; color: var(--accent-neon); }
+  .feature-item span { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+  .btn-start-landing { background: var(--accent-neon); color: black; padding: 16px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); transition: 0.3s; }
+  .btn-start-landing:active { transform: scale(0.95); }
+
+  /* ===== 3. AUTH ===== */
+  #auth-container { position: fixed; inset: 0; background: var(--bg-main); display: none; align-items: center; justify-content: center; z-index: 1000; }
   .auth-card { width: 360px; max-width: 90vw; text-align: center; }
-  .auth-logo { width: 50px; height: 50px; border-radius: 50%; background: white; color: black; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; margin: 0 auto 20px; }
+  .auth-logo-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px; display: block; border: 2px solid var(--accent-neon); box-shadow: 0 0 15px rgba(0,212,255,0.4); }
   .auth-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
   .auth-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
   .auth-input { width: 100%; padding: 14px; margin-bottom: 12px; background: var(--bg-input-box); border: 1px solid var(--border-color); border-radius: 12px; color: white; font-size: 15px; outline: none; }
-  .auth-input:focus { border-color: #666; }
-  .auth-submit { width: 100%; padding: 14px; background: white; color: black; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 8px; }
+  .auth-input:focus { border-color: var(--accent-neon); }
+  .auth-submit { width: 100%; padding: 14px; background: white; color: black; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 8px; cursor: pointer; }
   .auth-toggle { margin-top: 20px; font-size: 14px; color: var(--text-muted); }
-  .auth-toggle a { color: white; font-weight: 500; cursor: pointer; text-decoration: none; margin-left: 4px; }
+  .auth-toggle-link { color: white; font-weight: 500; cursor: pointer; text-decoration: underline; margin-left: 4px; }
   .auth-error { color: var(--accent-red); font-size: 13px; margin-bottom: 10px; display: none; }
+  .btn-back-landing { margin-top: 20px; color: var(--text-muted); font-size: 13px; text-decoration: underline; }
 
   /* LAYOUT & SIDEBAR */
-  #app-container { display: none; height: 100vh; width: 100%; position: relative; }
+  #app-container { display: none; height: 100vh; width: 100%; position: relative; z-index: 10; }
   #view-sidebar { position: absolute; inset: 0; background: var(--bg-sidebar); display: none; flex-direction: column; z-index: 10; }
   #view-sidebar.active { display: flex; }
   .sidebar-header { padding: 20px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -64,6 +117,7 @@
   .msg-avatar.user { background: #444; color: white; }
   .msg-content { font-size: 16px; line-height: 1.6; white-space: pre-wrap; max-width: 100%; word-wrap: break-word; }
   .message.user .msg-content { background: var(--bg-hover); padding: 12px 16px; border-radius: 20px; max-width: 85%; }
+  .msg-image { max-width: 100%; border-radius: 12px; margin-top: 10px; display: block; }
 
   /* INPUT BOX */
   .chat-input-area { padding: 10px 16px 24px; }
@@ -80,6 +134,8 @@
   .btn-model-pill { background: var(--bg-icon); color: var(--text-primary); padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
   .btn-send-new { width: 38px; height: 38px; border-radius: 50%; background: white; color: black; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
   .btn-send-new:disabled { background: #444; color: #888; }
+  .mic-active { background: var(--accent-red) !important; color: white !important; animation: pulse 1s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
   /* PROFILE */
   #view-profile { position: absolute; inset: 0; background: var(--bg-main); z-index: 30; display: none; flex-direction: column; overflow-y: auto; }
@@ -145,7 +201,7 @@
 
   .modal-content { background: #1c1c1e; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; max-height: 90vh; overflow-y: auto; margin: auto; }
   .modal-content h3 { margin-bottom: 16px; font-size: 20px; text-align: center; }
-  .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 10px; text-align: center; }
+  .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; margin-top: 10px; text-align: center; cursor: pointer; }
   .modal-btn.primary { background: white; color: black; }
   .modal-btn.success { background: var(--accent-green); color: white; }
   .modal-btn.danger { background: var(--accent-red); color: white; }
@@ -155,40 +211,79 @@
   .total-price { font-size: 24px; font-weight: bold; color: var(--accent-green); text-align: center; margin: 10px 0; }
   .dev-request-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
   .dev-request-card img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin: 10px 0; background: #000; }
+
+  /* STYLE UNTUK LAPORAN BUG (WARNA ABU-ABU) */
+  .bug-time-text { color: #888; font-size: 12px; margin-top: 6px; font-weight: 500; }
 </style>
 </head>
 <body>
 
+<!-- ================= 1. SPLASH SCREEN ================= -->
+<div id="splash-container" onclick="skipSplash()">
+  <img src="https://cdn.phototourl.com/member/2026-10-31-0eda629a-6f7f-4054-b609-5aae9e2a0c5e.png" class="splash-logo" alt="Logo">
+  <div class="spinner"></div>
+  <p class="skip-text">Ketuk di mana saja untuk melanjutkan</p>
+</div>
+
+<!-- ================= 2. LANDING PAGE ================= -->
+<div id="landing-container">
+  <img src="https://cdn.phototourl.com/member/2026-10-31-0eda629a-6f7f-4054-b609-5aae9e2a0c5e.png" class="landing-logo" alt="Logo">
+  <h1 class="landing-title">MILBRAV AI</h1>
+  <p class="landing-sub">Asisten AI Masa Depan dalam Genggamanmu</p>
+  
+  <div class="features-grid">
+    <div class="feature-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Chat Cepat</span>
+    </div>
+    <div class="feature-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span>Bikin Gambar</span>
+    </div>
+    <div class="feature-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <span>Voice Chat</span>
+    </div>
+  </div>
+
+  <button class="btn-start-landing" onclick="goToAuth()">Mulai Ngobrol</button>
+</div>
+
+<!-- ================= 3. AUTH ================= -->
 <div id="auth-container">
   <div class="auth-card">
-    <div class="auth-logo">M</div>
+    <img src="https://cdn.phototourl.com/member/2026-10-31-0eda629a-6f7f-4054-b609-5aae9e2a0c5e.png" class="auth-logo-img" alt="Logo">
     <h1 class="auth-title" id="auth-title">Selamat datang</h1>
     <p class="auth-sub" id="auth-sub">Masuk untuk melanjutkan</p>
     <div class="auth-error" id="auth-error"></div>
     <input type="text" class="auth-input" id="auth-username" placeholder="Username" />
     <input type="password" class="auth-input" id="auth-password" placeholder="Password" />
-    <button class="auth-submit" id="btn-auth-submit">Masuk</button>
+    
+    <button type="button" class="auth-submit" id="btn-auth-submit">Masuk</button>
+    
     <div class="auth-toggle">
       <span id="auth-toggle-text">Belum punya akun?</span>
-      <a id="auth-toggle-link">Daftar</a>
+      <span id="auth-toggle-link" class="auth-toggle-link">Daftar</span>
     </div>
+    <button type="button" class="btn-back-landing" onclick="backToLanding()">Kembali ke Beranda</button>
   </div>
 </div>
 
+<!-- ================= 4. APLIKASI UTAMA ================= -->
 <div id="app-container">
   <div id="view-sidebar">
     <div class="sidebar-header"><h1>Milbrav AI</h1></div>
     <div class="divider"></div>
     <div class="sidebar-history" id="sidebar-history"></div>
     <div class="sidebar-bottom">
-      <button class="btn-new-chat-pill" id="btn-new-chat">+ Obrolan Baru</button>
-      <button class="btn-profile" id="btn-open-profile"><span id="sidebar-avatar-initial">U</span></button>
+      <button type="button" class="btn-new-chat-pill" id="btn-new-chat">+ Obrolan Baru</button>
+      <button type="button" class="btn-profile" id="btn-open-profile"><span id="sidebar-avatar-initial">U</span></button>
     </div>
   </div>
 
   <div id="view-chat">
     <div class="chat-header">
-      <button class="icon-btn" id="btn-open-sidebar">
+      <button type="button" class="icon-btn" id="btn-open-sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h2 id="chat-title-header">Milbrav AI</h2>
@@ -197,16 +292,18 @@
     
     <div class="chat-input-area">
       <div class="chat-input-box">
-        <div id="attachment-preview"><span id="attachment-name">Nama File</span><button onclick="removeAttachment()">✕</button></div>
+        <div id="attachment-preview"><span id="attachment-name">Nama File</span><button type="button" onclick="removeAttachment()">✕</button></div>
         <textarea id="input-message" placeholder="Balas Milbrav..." rows="1"></textarea>
         <div class="input-controls">
           <div class="left-controls">
-            <button class="btn-icon-circle" id="btn-plus-menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-            <button class="btn-model-pill" id="btn-model-selector"><span id="current-model-name">Milbrav AI</span><svg id="model-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <button type="button" class="btn-icon-circle" id="btn-plus-menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button type="button" class="btn-model-pill" id="btn-model-selector"><span id="current-model-name">Milbrav AI</span><svg id="model-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
           </div>
           <div class="right-controls">
-            <button class="btn-icon-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-            <button class="btn-send-new" id="btn-send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+            <button type="button" class="btn-icon-circle" id="btn-voice" style="display: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+            <button type="button" class="btn-send-new" id="btn-send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
           </div>
         </div>
       </div>
@@ -214,7 +311,7 @@
   </div>
 
   <div id="view-profile">
-    <div class="profile-header"><button class="btn-back" id="btn-close-profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button></div>
+    <div class="profile-header"><button type="button" class="btn-back" id="btn-close-profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button></div>
     <div class="profile-user-info"><div class="profile-pic-large"><span id="profile-avatar-initial">U</span></div><h2 class="profile-name" id="profile-username-display">USERNAME</h2></div>
     
     <div class="settings-section">
@@ -225,18 +322,50 @@
       </div>
     </div>
     
+    <!-- FITUR INFORMASI WA (MUNCUL UNTUK SEMUA USER) -->
+    <div class="settings-section">
+      <div class="settings-title">Lainnya</div>
+      <div class="settings-card">
+        <div class="setting-item" onclick="window.open('https://whatsapp.com/channel/0029Vb7kecu9MF93L3noUz3w', '_blank')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span class="setting-text" style="color:#10b981; font-weight:600;">Informasi AI Milbrav</span>
+          <svg class="setting-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <!-- FITUR LAPORAN BUG UNTUK USER (DISEMBUNYIKAN DARI DEV) -->
+        <div class="setting-item" id="btn-open-bug-report-user">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="setting-text" style="color:#f39c12; font-weight:600;">Laporan Bug System</span>
+          <svg class="setting-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section" id="pdf-section" style="display:none;">
+      <div class="settings-title">Developer Tools</div>
+      <div class="settings-card">
+        <div class="setting-item" id="btn-export-pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="setting-text">Export Chat ke PDF</span>
+        </div>
+      </div>
+    </div>
+
     <div class="settings-section" id="dev-section" style="display:none;">
       <div class="settings-title" style="color: #e74c3c;">Developer Area</div>
       <div class="settings-card" style="padding: 16px; margin-bottom: 10px;">
         <label style="font-size:12px; color:var(--text-muted); font-weight:bold;">Pengaturan API Global (KunciAI)</label>
         <input type="password" id="input-api-key" placeholder="API Key KunciAI" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:white; margin-top:8px; margin-bottom:12px; outline:none;">
         <input type="text" id="input-base-url" value="https://kunciai.id/v1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:white; margin-bottom:12px; outline:none;">
-        <button id="btn-save-api" style="width:100%; padding:10px; background:white; color:black; border-radius:8px; font-weight:bold; margin-top:12px;">Simpan API Key</button>
+        <button type="button" id="btn-save-api" style="width:100%; padding:10px; background:white; color:black; border-radius:8px; font-weight:bold; margin-top:12px; cursor:pointer;">Simpan API Key</button>
       </div>
       <div class="settings-card">
         <div class="setting-item" id="btn-open-dev-panel"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span class="setting-text" style="color:#e74c3c;">Panel Konfirmasi Pembayaran</span></div>
+        <div class="setting-item" id="btn-view-user-chats"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="setting-text" style="color:#e74c3c;">Monitoring Chat User</span></div>
+        <!-- FITUR LAPORAN BUG UNTUK DEV -->
+        <div class="setting-item" id="btn-view-bug-reports"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="setting-text" style="color:#e74c3c;">Laporan Bug by User</span></div>
       </div>
     </div>
+    
     <div class="btn-logout-card" id="btn-logout"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Keluar</span></div>
   </div>
 </div>
@@ -244,9 +373,8 @@
 <!-- MODAL MODEL -->
 <div id="model-modal" class="modal-overlay">
   <div class="bottom-sheet">
-    <div class="sheet-header"><button class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
+    <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-    
     <div class="manual-input-container" id="manual-model-container">
       <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:block; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
       <select id="select-manual-model" class="custom-select">
@@ -260,17 +388,15 @@
         <option value="claude-opus-4.8">claude-opus-4.8</option>
       </select>
     </div>
-    
     <div class="model-list" id="model-list-container"></div>
-    
-    <button class="modal-btn primary" id="btn-save-model-choice" style="margin-top: 24px;">Simpan Pilihan</button>
+    <button type="button" class="modal-btn primary" id="btn-save-model-choice" style="margin-top: 24px;">Simpan Pilihan</button>
   </div>
 </div>
 
 <!-- MODAL PLUS (+) -->
 <div id="plus-modal" class="modal-overlay">
   <div class="bottom-sheet">
-    <div class="sheet-header"><button class="close-btn" onclick="closeModal('plus-modal')">✕</button><h3>Tambahkan ke chat</h3></div>
+    <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('plus-modal')">✕</button><h3>Tambahkan ke chat</h3></div>
     <div class="plus-grid">
       <div class="plus-item" onclick="document.getElementById('input-camera').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Kamera</span></div>
       <div class="plus-item" onclick="document.getElementById('input-photo').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
@@ -284,7 +410,6 @@
       <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><div class="info"><h4>Tambahkan ke proyek</h4><p>Tidak ada</p></div></div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    
     <div class="plus-list-item" onclick="checkPremium('Pencarian Web')">
       <div class="plus-list-left">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -292,15 +417,13 @@
       </div>
       <div class="toggle-switch" id="toggle-web-search"></div>
     </div>
-    
-    <div class="plus-list-item" onclick="checkPremium('Konektor')">
+    <div class="plus-list-item" onclick="checkPremium('Generate Gambar')">
       <div class="plus-list-left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-        <div class="info"><h4>Konektor</h4></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="info"><h4>Generate Gambar</h4></div>
       </div>
-      <div style="color: var(--accent-blue); font-size: 12px; font-weight: bold;">Segera Hadir</div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    
     <div class="plus-list-item" onclick="checkPremium('Memori')">
       <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><div class="info"><h4>Memori</h4></div></div>
       <div class="toggle-switch"></div>
@@ -312,10 +435,10 @@
 <div id="upgrade-modal" class="modal-overlay center">
   <div class="modal-content">
     <h3>Pilih Paket</h3>
-    <button class="modal-btn outline" onclick="showPayment('Premium', 17000)">Premium - Rp 17.000</button>
-    <button class="modal-btn outline" onclick="showPayment('Pro', 25000)">Pro - Rp 25.000</button>
-    <button class="modal-btn outline" onclick="showPayment('Pro+', 45000)">Pro+ - Rp 45.000</button>
-    <button class="modal-btn primary" onclick="closeModal('upgrade-modal')" style="background:#333; color:white; margin-top:20px;">Batal</button>
+    <button type="button" class="modal-btn outline" onclick="showPayment('Premium', 17000)">Premium - Rp 17.000</button>
+    <button type="button" class="modal-btn outline" onclick="showPayment('Pro', 25000)">Pro - Rp 25.000</button>
+    <button type="button" class="modal-btn outline" onclick="showPayment('Pro+', 45000)">Pro+ - Rp 45.000</button>
+    <button type="button" class="modal-btn primary" onclick="closeModal('upgrade-modal')" style="background:#333; color:white; margin-top:20px;">Batal</button>
   </div>
 </div>
 <div id="payment-modal" class="modal-overlay center">
@@ -324,12 +447,11 @@
     <p style="text-align:center; color:var(--text-muted);" id="pay-tier-name">Paket</p>
     <div class="total-price" id="pay-total-price">Rp 0</div>
     <div class="qris-container">
-      <!-- GAMBAR QRIS SUDAH DIGANTI DENGAN LINK DARI KAMU -->
       <img src="https://cdn.phototourl.com/member/2026-10-31-7aac9dfe-fcd0-4346-a3e1-4c1ebb921f36.jpg" alt="QRIS">
       <p style="color:black; font-size:12px; margin-top:8px;">Scan QRIS di atas</p>
     </div>
-    <button class="modal-btn success" id="btn-sudah-bayar">Saya Sudah Bayar</button>
-    <button class="modal-btn primary" onclick="closeModal('payment-modal')" style="background:#333; color:white;">Batal</button>
+    <button type="button" class="modal-btn success" id="btn-sudah-bayar">Saya Sudah Bayar</button>
+    <button type="button" class="modal-btn primary" onclick="closeModal('payment-modal')" style="background:#333; color:white;">Batal</button>
   </div>
 </div>
 <div id="proof-modal" class="modal-overlay center">
@@ -337,15 +459,49 @@
     <h3>Kirim Bukti Transfer</h3>
     <p style="text-align:center; font-size:14px; margin-bottom:16px;">Pilih foto/screenshot struk pembayaran Anda.</p>
     <input type="file" id="proof-file" accept="image/*" style="width:100%; padding:10px; background:#222; border-radius:8px; color:white; margin-bottom:16px;">
-    <button class="modal-btn primary" id="btn-submit-proof">Kirim Bukti</button>
-    <button class="modal-btn outline" onclick="closeModal('proof-modal')">Batal</button>
+    <button type="button" class="modal-btn primary" id="btn-submit-proof">Kirim Bukti</button>
+    <button type="button" class="modal-btn outline" onclick="closeModal('proof-modal')">Batal</button>
   </div>
 </div>
 <div id="dev-panel-modal" class="modal-overlay center">
   <div class="modal-content" style="max-width: 500px;">
     <h3>Panel Konfirmasi Pembayaran</h3>
     <div id="dev-payment-list" style="margin-top:16px;"></div>
-    <button class="modal-btn primary" onclick="closeModal('dev-panel-modal')" style="margin-top:16px;">Tutup</button>
+    <button type="button" class="modal-btn primary" onclick="closeModal('dev-panel-modal')" style="margin-top:16px;">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL LIHAT CHAT USER (DEV) -->
+<div id="dev-user-chats-modal" class="modal-overlay center">
+  <div class="modal-content" style="max-width: 600px; width: 95%;">
+    <h3>Monitoring Chat User</h3>
+    <select id="dev-select-user" class="custom-select" style="margin-bottom: 16px;">
+      <option value="">-- Pilih User --</option>
+    </select>
+    <div id="dev-chat-display" style="background: #111; padding: 12px; border-radius: 12px; height: 60vh; overflow-y: auto;">
+      <p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>
+    </div>
+    <button type="button" class="modal-btn primary" onclick="closeModal('dev-user-chats-modal')" style="margin-top: 16px;">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL LAPORAN BUG (USER) -->
+<div id="user-bug-modal" class="modal-overlay center">
+  <div class="modal-content">
+    <h3>Laporan Bug System</h3>
+    <p style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted);">Jelaskan bug atau error yang Anda temui.</p>
+    <textarea id="input-bug-report" placeholder="Contoh: Ai nya bnyk bug..." style="width:100%; height:100px; padding:12px; border-radius:8px; background:#111; border:1px solid #333; color:white; outline:none; resize:none; margin-bottom:16px;"></textarea>
+    <button type="button" class="modal-btn primary" id="btn-submit-bug">Kirim Laporan</button>
+    <button type="button" class="modal-btn outline" onclick="closeModal('user-bug-modal')">Batal</button>
+  </div>
+</div>
+
+<!-- MODAL LIHAT LAPORAN BUG (DEV) -->
+<div id="dev-bug-modal" class="modal-overlay center">
+  <div class="modal-content" style="max-width: 500px;">
+    <h3>Laporan Bug by User</h3>
+    <div id="dev-bug-list" style="height: 60vh; overflow-y: auto; margin-top:16px;"></div>
+    <button type="button" class="modal-btn primary" onclick="closeModal('dev-bug-modal')" style="margin-top:16px;">Tutup</button>
   </div>
 </div>
 
@@ -354,8 +510,24 @@
   "use strict";
   const DEV_USERNAME = "DEVELOPER";
   const DEV_PASSWORD = "ahmad emil";
+  
   let state = { user: null, chats: [], activeChatId: null };
   const STORAGE_KEY = "milbrav_chat_app";
+  
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  
+  function loadState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} }
+    
+    if (state.user && state.user.username) {
+      const userChatsRaw = localStorage.getItem(`milbrav_chats_${state.user.username}`);
+      if (userChatsRaw) {
+        try { state.chats = JSON.parse(userChatsRaw); } catch(e) {}
+      }
+    }
+  }
+
   let isRegisterMode = false;
   let tempSelectedModel = "";
   let currentAttachment = null;
@@ -363,6 +535,9 @@
 
   const authContainer = document.getElementById("auth-container");
   const appContainer = document.getElementById("app-container");
+  const splashContainer = document.getElementById("splash-container");
+  const landingContainer = document.getElementById("landing-container");
+  
   const viewSidebar = document.getElementById("view-sidebar");
   const viewChat = document.getElementById("view-chat");
   const viewProfile = document.getElementById("view-profile");
@@ -372,11 +547,108 @@
   const MODELS = {
     "claude-opus-4.8": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro" },
     "claude-opus-4.6": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks dan tugas sehari-hari", badge: "Pro" },
-    "claude-sonnet-4.6": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas yang lebih sederhana", badge: "" },
+    "claude-sonnet-4.6": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas yang lebih sederhana", badge: "Premium" },
     "deepseek-v4-flash": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "" }
   };
 
-  // ===== CEK KUOTA TIER =====
+  // ===== FUNGSI WAKTU (WIB/WITA/WIT) =====
+  function getWaktuLapor() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset(); // dalam menit
+    let tz = "WIB";
+    if (offset <= -480) tz = "WITA";
+    if (offset <= -540) tz = "WIT";
+    
+    const jam = String(now.getHours()).padStart(2, '0');
+    const menit = String(now.getMinutes()).padStart(2, '0');
+    return `${jam}:${menit} ${tz}`;
+  }
+
+  // ===== FUNGSI NAVIGASI AWAL =====
+  window.skipSplash = function() {
+    splashContainer.style.display = "none";
+    landingContainer.style.display = "flex";
+  };
+
+  window.goToAuth = function() {
+    landingContainer.style.display = "none";
+    authContainer.style.display = "flex";
+  };
+
+  window.backToLanding = function() {
+    authContainer.style.display = "none";
+    landingContainer.style.display = "flex";
+  };
+
+  // ===== FITUR LAPORAN BUG (USER) =====
+  document.getElementById("btn-open-bug-report-user").addEventListener("click", () => {
+    document.getElementById("user-bug-modal").classList.add("active");
+  });
+
+  document.getElementById("btn-submit-bug").addEventListener("click", () => {
+    const bugText = document.getElementById("input-bug-report").value.trim();
+    if (!bugText) return alert("Laporan tidak boleh kosong!");
+
+    const waktuLapor = getWaktuLapor();
+    
+    let bugReports = JSON.parse(localStorage.getItem("milbrav_bug_reports") || "[]");
+    bugReports.push({
+      id: "bug_" + Date.now(),
+      username: state.user.username,
+      report: bugText,
+      time: waktuLapor,
+      date: new Date().toLocaleDateString('id-ID')
+    });
+    localStorage.setItem("milbrav_bug_reports", JSON.stringify(bugReports));
+    
+    alert("Laporan bug berhasil dikirim ke Developer. Terima kasih!");
+    document.getElementById("input-bug-report").value = "";
+    closeModal("user-bug-modal");
+  });
+
+  // ===== FITUR LIHAT LAPORAN BUG (DEV) =====
+  document.getElementById("btn-view-bug-reports").addEventListener("click", () => {
+    const container = document.getElementById("dev-bug-list");
+    let bugReports = JSON.parse(localStorage.getItem("milbrav_bug_reports") || "[]");
+    
+    if (bugReports.length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada laporan bug dari user.</p>";
+    } else {
+      container.innerHTML = "";
+      // Urutkan dari yang terbaru
+      bugReports.reverse().forEach(bug => {
+        const div = document.createElement("div");
+        div.className = "dev-request-card";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;">
+              <b style="color:#fff;">${bug.username}</b> 
+              <span style="color:#888; font-size:12px;">${bug.date}</span>
+          </div>
+          <p style="margin:5px 0; color:#ececec; font-size:14px; line-height: 1.4;">Laporan: ${bug.report}</p>
+          <p class="bug-time-text">Jam di lapor: ${bug.time}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+    document.getElementById("dev-bug-modal").classList.add("active");
+  });
+
+
+  // ===== SINKRONISASI TIER DARI DATABASE =====
+  function syncTier() {
+    if (!state.user || state.user.isDev) return;
+    let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
+    if (users[state.user.username]) {
+      const currentDbTier = users[state.user.username].tier || "free";
+      if (state.user.tier !== currentDbTier) {
+        state.user.tier = currentDbTier;
+        saveState();
+      }
+      document.getElementById("current-tier-display").textContent = state.user.tier.toUpperCase();
+    }
+  }
+
+  // ===== KUOTA TIER =====
   const getDailyLimit = () => {
     const t = state.user ? state.user.tier : "free";
     if (t === "dev" || t === "proplus") return Infinity;
@@ -385,7 +657,26 @@
     return 100;
   };
 
-  // FITUR PREMIUM (PENCARIAN WEB DLL)
+  // ===== LOGIKA AKSES AI (TIERING) =====
+  function canAccessModel(modelId) {
+    if (state.user.isDev) return true;
+    
+    const userTier = (state.user.tier || "free").toLowerCase();
+    
+    let userLevel = 0;
+    if (userTier === "premium") userLevel = 1;
+    else if (userTier === "pro") userLevel = 2;
+    else if (userTier === "proplus") userLevel = 3;
+    
+    let modelLevel = 0;
+    if (modelId === "claude-sonnet-4.6") modelLevel = 1; // Premium
+    else if (modelId === "claude-opus-4.6") modelLevel = 2; // Pro
+    else if (modelId === "claude-opus-4.8") modelLevel = 2; // Pro
+    
+    return userLevel >= modelLevel;
+  }
+
+  // ===== FITUR PREMIUM & KHUSUS DEV =====
   window.checkPremium = function(featureName) {
     if (state.user.tier === "free" && !state.user.isDev) {
       closeModal('plus-modal');
@@ -393,52 +684,183 @@
       return;
     }
     
-    // Kalau bukan free, jalankan fitur
     if (featureName === 'Pencarian Web') {
       isWebSearchActive = !isWebSearchActive;
       const toggle = document.getElementById('toggle-web-search');
       if (isWebSearchActive) toggle.classList.add('active');
       else toggle.classList.remove('active');
       closeModal('plus-modal');
+    } else if (featureName === 'Generate Gambar') {
+      const promptGambar = prompt("Masukkan deskripsi gambar yang ingin dibuat (contoh: Kucing oren pakai kacamata hitam):");
+      if (promptGambar) {
+        closeModal('plus-modal');
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        chat.messages.push({ role: "user", content: `[Generate Gambar] ${promptGambar}` });
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptGambar)}?width=1024&height=1024&nologo=true`;
+        chat.messages.push({ role: "assistant", content: `Ini gambar untuk "${promptGambar}":\n![Gambar](${imageUrl})` });
+        if (chat.title === "Obrolan Baru") chat.title = "Gambar: " + promptGambar.substring(0, 15) + "...";
+        document.getElementById("chat-title-header").textContent = chat.title;
+        saveUserChats(); renderChat(); renderHistory();
+      }
     } else {
       alert(`Fitur ${featureName} segera hadir!`);
     }
   };
 
-  inputMessage.addEventListener("input", function() {
-    this.style.height = "auto"; this.style.height = Math.min(this.scrollHeight, 120) + "px";
-    btnSend.disabled = this.value.trim().length === 0 && !currentAttachment;
-  });
-  inputMessage.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!btnSend.disabled) btnSend.click(); }
-  });
-
-  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-  function loadState() { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} } }
-
-  // ===== AUTENTIKASI =====
-  document.getElementById("btn-auth-submit").addEventListener("click", () => {
-    const username = document.getElementById("auth-username").value.trim();
-    const password = document.getElementById("auth-password").value;
-    if (!username || !password) return showAuthError("Isi semua data!");
-    if (username === DEV_USERNAME && password === DEV_PASSWORD) {
-      state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
-      state.chats = []; state.activeChatId = null; saveState(); enterApp(); return;
+  // ===== FITUR VOICE CHAT =====
+  let recognition;
+  let isRecording = false;
+  
+  const setupVoice = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      document.getElementById("btn-voice").style.display = "none";
+      return;
     }
+    
+    recognition = new SpeechRecognition();
+    recognition.lang = 'id-ID';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function() {
+      isRecording = true;
+      document.getElementById("btn-voice").classList.add("mic-active");
+    };
+
+    recognition.onresult = function(event) {
+      const text = event.results[0][0].transcript;
+      inputMessage.value += (inputMessage.value ? " " : "") + text;
+      inputMessage.dispatchEvent(new Event('input'));
+    };
+
+    recognition.onerror = function() {
+      isRecording = false;
+      document.getElementById("btn-voice").classList.remove("mic-active");
+    };
+
+    recognition.onend = function() {
+      isRecording = false;
+      document.getElementById("btn-voice").classList.remove("mic-active");
+    };
+  };
+  setupVoice();
+
+  document.getElementById("btn-voice").addEventListener("click", () => {
+    if (!recognition) return alert("Browser ini tidak mendukung fitur Voice Chat.");
+    if (isRecording) recognition.stop();
+    else recognition.start();
+  });
+
+  // ===== FITUR EXPORT PDF =====
+  document.getElementById("btn-export-pdf").addEventListener("click", () => {
+    const chat = state.chats.find(c => c.id === state.activeChatId);
+    if (!chat || chat.messages.length === 0) return alert("Belum ada chat untuk di-export.");
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.text("Milbrav AI - History Chat", 10, 10);
+    doc.setFontSize(10);
+    doc.text(`User: ${state.user.username} | Tanggal: ${new Date().toLocaleString('id-ID')}`, 10, 18);
+    
+    let y = 30;
+    chat.messages.forEach(m => {
+      const role = m.role === 'user' ? 'Anda' : 'Milbrav AI';
+      const cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+      const text = `${role}: ${cleanContent}`;
+      const splitText = doc.splitTextToSize(text, 180);
+      
+      if (y + (splitText.length * 7) > 280) { doc.addPage(); y = 10; }
+      doc.text(splitText, 10, y);
+      y += (splitText.length * 7) + 5;
+    });
+    
+    doc.save(`Milbrav_Chat_${chat.id}.pdf`);
+  });
+
+  // ===== MONITORING CHAT USER (DEV) =====
+  document.getElementById("btn-view-user-chats").addEventListener("click", () => {
+    const select = document.getElementById("dev-select-user");
+    select.innerHTML = '<option value="">-- Pilih User --</option>';
+    
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
-    if (isRegisterMode) {
-      if (username === DEV_USERNAME) return showAuthError("Username dilarang!");
-      if (users[username]) return showAuthError("Username sudah dipakai!");
-      users[username] = { password, tier: "free", email: `${username}@gmail.com` };
-      localStorage.setItem("milbrav_users", JSON.stringify(users));
-      alert("Daftar berhasil! Silakan masuk."); toggleAuthMode(); return;
+    Object.keys(users).forEach(u => {
+      const option = document.createElement("option");
+      option.value = u; option.textContent = u;
+      select.appendChild(option);
+    });
+
+    document.getElementById("dev-chat-display").innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>`;
+    document.getElementById("dev-user-chats-modal").classList.add("active");
+  });
+
+  document.getElementById("dev-select-user").addEventListener("change", (e) => {
+    const username = e.target.value;
+    const display = document.getElementById("dev-chat-display");
+    
+    if (!username) {
+      display.innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>`;
+      return;
     }
-    if (!users[username] || users[username].password !== password) return showAuthError("Username / Password salah!");
-    state.user = { username, tier: users[username].tier || "free", email: users[username].email };
-    state.chats = []; state.activeChatId = null;
+
     const raw = localStorage.getItem(`milbrav_chats_${username}`);
-    if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
-    saveState(); enterApp();
+    let chats = [];
+    if (raw) { try { chats = JSON.parse(raw); } catch(e) {} }
+
+    if (chats.length === 0) {
+      display.innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">User ini belum memiliki chat.</p>`;
+      return;
+    }
+
+    let html = "";
+    chats.forEach(chat => {
+      html += `<div style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <h4 style="color: #60a5fa; margin-bottom: 8px; font-size: 14px;">📁 ${chat.title}</h4>`;
+      
+      chat.messages.forEach(m => {
+        const role = m.role === 'user' ? 'User' : 'AI';
+        const color = m.role === 'user' ? '#10b981' : '#ececec';
+        const cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+        html += `<div style="margin-bottom: 8px; font-size: 13px; line-height: 1.4;">
+          <span style="color: ${color}; font-weight: bold;">${role}:</span> 
+          <span style="color: #aaa; white-space: pre-wrap;">${cleanContent}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    
+    display.innerHTML = html;
+  });
+
+  // ===== AUTHENTICATION =====
+  document.getElementById("btn-auth-submit").addEventListener("click", () => {
+    try {
+      const username = document.getElementById("auth-username").value.trim();
+      const password = document.getElementById("auth-password").value;
+      if (!username || !password) return showAuthError("Isi semua data!");
+      if (username === DEV_USERNAME && password === DEV_PASSWORD) {
+        state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
+        state.chats = []; state.activeChatId = null; saveState(); enterApp(); return;
+      }
+      let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
+      if (isRegisterMode) {
+        if (username === DEV_USERNAME) return showAuthError("Username dilarang!");
+        if (users[username]) return showAuthError("Username sudah dipakai!");
+        users[username] = { password, tier: "free", email: `${username}@gmail.com` };
+        localStorage.setItem("milbrav_users", JSON.stringify(users));
+        alert("Daftar berhasil! Silakan masuk."); toggleAuthMode(); return;
+      }
+      if (!users[username] || users[username].password !== password) return showAuthError("Username / Password salah!");
+      state.user = { username, tier: users[username].tier || "free", email: users[username].email };
+      state.chats = []; state.activeChatId = null;
+      const raw = localStorage.getItem(`milbrav_chats_${username}`);
+      if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
+      saveState(); enterApp();
+    } catch(e) {
+      alert("Error Login: " + e.message);
+    }
   });
 
   function showAuthError(msg) { const el = document.getElementById("auth-error"); el.textContent = msg; el.style.display = "block"; }
@@ -452,52 +874,75 @@
   }
   document.getElementById("auth-toggle-link").addEventListener("click", toggleAuthMode);
 
-  function enterApp() {
-    authContainer.style.display = "none"; appContainer.style.display = "block";
-    document.getElementById("profile-username-display").textContent = state.user.username;
-    document.getElementById("sidebar-avatar-initial").textContent = state.user.username.charAt(0).toUpperCase();
-    document.getElementById("profile-avatar-initial").textContent = state.user.username.charAt(0).toUpperCase();
-    document.getElementById("current-tier-display").textContent = state.user.tier.toUpperCase();
-    
-    if (state.user.isDev) {
-      document.getElementById("dev-section").style.display = "block";
-      const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      document.getElementById("input-api-key").value = globalApi.apiKey || "";
-      document.getElementById("input-base-url").value = globalApi.baseUrl || "https://kunciai.id/v1";
-      
-      document.getElementById("manual-model-container").style.display = "block";
-      document.getElementById("model-sub-header").style.display = "flex";
-      document.getElementById("btn-save-model-choice").style.display = "block";
-    } else { 
-      document.getElementById("dev-section").style.display = "none"; 
-      
-      document.getElementById("manual-model-container").style.display = "none";
-      document.getElementById("model-sub-header").style.display = "none";
-      document.getElementById("btn-save-model-choice").style.display = "none";
+  document.getElementById("auth-password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("btn-auth-submit").click();
     }
+  });
 
-    document.getElementById("btn-model-selector").onclick = () => {
+  function enterApp() {
+    try {
+      authContainer.style.display = "none"; appContainer.style.display = "block";
+      
+      const uName = (state.user && state.user.username) ? state.user.username : "User";
+      document.getElementById("profile-username-display").textContent = uName;
+      document.getElementById("sidebar-avatar-initial").textContent = uName.charAt(0).toUpperCase();
+      document.getElementById("profile-avatar-initial").textContent = uName.charAt(0).toUpperCase();
+      document.getElementById("current-tier-display").textContent = (state.user && state.user.tier ? state.user.tier : "free").toUpperCase();
+      
+      if (state.user && state.user.isDev) {
+        document.getElementById("dev-section").style.display = "block";
+        document.getElementById("pdf-section").style.display = "block";
+        document.getElementById("btn-voice").style.display = "flex";
+        
+        // Sembunyikan laporan bug user, Tampilkan menu Dev
+        document.getElementById("btn-open-bug-report-user").style.display = "none";
+        
+        const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+        document.getElementById("input-api-key").value = globalApi.apiKey || "";
+        document.getElementById("input-base-url").value = globalApi.baseUrl || "https://kunciai.id/v1";
+        
+        document.getElementById("manual-model-container").style.display = "block";
+        document.getElementById("model-sub-header").style.display = "flex";
+        document.getElementById("btn-save-model-choice").style.display = "block";
+      } else { 
+        document.getElementById("dev-section").style.display = "none"; 
+        document.getElementById("pdf-section").style.display = "none";
+        document.getElementById("btn-voice").style.display = "none";
+        
+        // Tampilkan laporan bug user
+        document.getElementById("btn-open-bug-report-user").style.display = "flex";
+        
+        document.getElementById("manual-model-container").style.display = "none";
+        document.getElementById("model-sub-header").style.display = "none";
+        document.getElementById("btn-save-model-choice").style.display = "none";
+      }
+
+      document.getElementById("btn-model-selector").onclick = () => {
+        const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+        tempSelectedModel = globalApi.model || "deepseek-v4-flash";
+        document.getElementById("select-manual-model").value = ""; 
+        renderModelList();
+        document.getElementById("model-modal").classList.add("active");
+      };
+
       const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      tempSelectedModel = globalApi.model || "deepseek-v4-flash";
-      document.getElementById("select-manual-model").value = ""; 
-      renderModelList();
-      document.getElementById("model-modal").classList.add("active");
-    };
+      updateModelUI(globalApi.model || "deepseek-v4-flash");
 
-    const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    updateModelUI(globalApi.model || "deepseek-v4-flash");
-
-    viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
-    if (state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
+      viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
+      if (state.chats && state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
+    } catch(e) {
+      console.error("Error saat masuk aplikasi:", e);
+      alert("Terjadi kesalahan data saat masuk. Error: " + e.message);
+    }
   }
 
   document.getElementById("btn-plus-menu").addEventListener("click", () => document.getElementById("plus-modal").classList.add("active"));
 
   function updateModelUI(modelId) {
     let modelData = MODELS[modelId];
-    if (!modelData) {
-      modelData = { name: modelId, desc: "Model kustom" };
-    }
+    if (!modelData) { modelData = { name: modelId, desc: "Model kustom" }; }
     document.getElementById("current-model-name").textContent = modelData.name;
   }
 
@@ -510,16 +955,25 @@
       const div = document.createElement("div");
       div.className = "model-item" + (key === tempSelectedModel ? " selected" : "");
       
+      const hasAccess = canAccessModel(key);
+      
+      let lockIcon = "";
+      if (!hasAccess && !state.user.isDev) {
+         lockIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="margin-left:auto; margin-right:10px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+         div.style.opacity = "0.6";
+      }
+
       div.innerHTML = `
         <div class="model-info" style="flex:1;">
           <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
           <p>${m.desc}</p>
         </div>
+        ${lockIcon}
         <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
       `;
 
       div.onclick = () => {
-        if (!state.user.isDev && key !== "deepseek-v4-flash") {
+        if (!hasAccess && !state.user.isDev) {
           closeModal('model-modal');
           document.getElementById('upgrade-modal').classList.add('active');
           return;
@@ -561,13 +1015,20 @@
 
   // Navigasi
   document.getElementById("btn-open-sidebar").addEventListener("click", () => { viewChat.classList.remove("active"); viewSidebar.classList.add("active"); renderHistory(); });
-  document.getElementById("btn-open-profile").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewProfile.classList.add("active"); });
+  
+  document.getElementById("btn-open-profile").addEventListener("click", () => { 
+    viewSidebar.classList.remove("active"); 
+    viewProfile.classList.add("active"); 
+    syncTier(); 
+  });
+  
   document.getElementById("btn-close-profile").addEventListener("click", () => { viewProfile.classList.remove("active"); viewSidebar.classList.add("active"); });
   document.getElementById("btn-new-chat").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); createNewChat(false); });
 
   // Riwayat
   function renderHistory() {
     const list = document.getElementById("sidebar-history"); list.innerHTML = "";
+    if (!state.chats) state.chats = [];
     state.chats.forEach(c => {
       const wrapper = document.createElement("div"); wrapper.className = "history-item-wrapper";
       const actions = document.createElement("div"); actions.className = "history-actions";
@@ -619,6 +1080,8 @@
   window.deleteChat = function(id) {
     if (!confirm("Hapus obrolan ini?")) return;
     state.chats = state.chats.filter(c => c.id !== id); saveUserChats();
+    localStorage.removeItem(`milbrav_draft_${state.user.username}_${id}`);
+    
     if (state.activeChatId === id) { if (state.chats.length > 0) openChat(state.chats[0].id); else createNewChat(true); }
     renderHistory();
   };
@@ -630,71 +1093,85 @@
     const chat = { id: "chat_" + Date.now(), title: "Obrolan Baru", messages: [] };
     state.chats.unshift(chat); saveUserChats(); openChat(chat.id);
   }
+  
   function openChat(id) {
-    state.activeChatId = id; document.getElementById("chat-title-header").textContent = state.chats.find(c => c.id === id).title;
+    state.activeChatId = id; 
+    document.getElementById("chat-title-header").textContent = state.chats.find(c => c.id === id).title;
+    
+    const draftKey = `milbrav_draft_${state.user.username}_${id}`;
+    inputMessage.value = localStorage.getItem(draftKey) || "";
+    
+    inputMessage.style.height = "auto";
+    inputMessage.style.height = (inputMessage.scrollHeight) + "px";
+    updateSendButtonState();
+
     renderChat(); renderHistory();
   }
+  
   function saveUserChats() { if (state.user) localStorage.setItem(`milbrav_chats_${state.user.username}`, JSON.stringify(state.chats)); }
   
-  // RENDER CHAT (Avatar AI Dihapus)
   function renderChat() {
     const chat = state.chats.find(c => c.id === state.activeChatId);
     const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
     chat.messages.forEach(m => {
       const row = document.createElement("div"); row.className = "message " + m.role;
+      let contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
       if (m.role === 'user') {
-        row.innerHTML = `<div class="msg-content">${m.content}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`;
+        row.innerHTML = `<div class="msg-content">${contentHtml}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`;
       } else {
-        row.innerHTML = `<div class="msg-content" style="padding-left: 0;">${m.content}</div>`;
+        row.innerHTML = `<div class="msg-content" style="padding-left: 0;">${contentHtml}</div>`;
       }
       box.appendChild(row);
     });
     box.scrollTop = box.scrollHeight;
   }
 
-  // ===== FITUR LAMPIRAN =====
   window.handleFileSelect = function(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
-    
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File terlalu besar. Maksimal 5MB ya bang!");
-      input.value = "";
-      return;
-    }
-
+    if (file.size > 5 * 1024 * 1024) { alert("File terlalu besar. Maksimal 5MB ya bang!"); input.value = ""; return; }
     const reader = new FileReader();
     reader.onload = function(e) {
-      currentAttachment = {
-        name: file.name,
-        type: file.type,
-        isText: file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json'),
-        data: e.target.result
-      };
-      
+      currentAttachment = { name: file.name, type: file.type, isText: file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json'), data: e.target.result };
       document.getElementById("attachment-preview").style.display = "flex";
       document.getElementById("attachment-name").textContent = file.name;
       
-      if (currentAttachment) document.getElementById("btn-send").disabled = false;
+      updateSendButtonState();
       
-      closeModal('plus-modal');
-      input.value = ""; 
+      closeModal('plus-modal'); input.value = ""; 
     };
-    
-    if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
-      reader.readAsText(file);
-    } else {
-      reader.readAsDataURL(file);
-    }
+    if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) reader.readAsText(file);
+    else reader.readAsDataURL(file);
   };
 
   window.removeAttachment = function() {
     currentAttachment = null;
     document.getElementById("attachment-preview").style.display = "none";
-    document.getElementById("btn-send").disabled = inputMessage.value.trim().length === 0;
+    updateSendButtonState();
   };
 
-  // ===== KIRIM PESAN =====
+  function updateSendButtonState() {
+    const hasText = inputMessage.value.trim().length > 0;
+    const hasAttachment = currentAttachment !== null;
+    btnSend.disabled = !(hasText || hasAttachment);
+  }
+
+  inputMessage.addEventListener("input", function() {
+    this.style.height = "auto";
+    this.style.height = (this.scrollHeight) + "px";
+    
+    if (state.user && state.activeChatId) {
+      const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
+      if (this.value.trim().length > 0) {
+        localStorage.setItem(draftKey, this.value);
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    }
+
+    updateSendButtonState();
+  });
+
   btnSend.addEventListener("click", async () => {
     const text = inputMessage.value.trim(); 
     if (!text && !currentAttachment) return;
@@ -709,29 +1186,30 @@
     }
 
     const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    
     if (!globalApi.apiKey) {
       if (state.user.isDev) return alert("Isi API Key KunciAI di menu Profil > Developer Area!");
       else return alert("Sistem belum siap: API Key belum diatur.");
     }
 
     const chat = state.chats.find(c => c.id === state.activeChatId);
-    
     let finalMessage = text;
     if (currentAttachment) {
-      if (currentAttachment.isText) {
-        finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
-      } else {
-        finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nPesan User:\n${text}`;
-      }
+      if (currentAttachment.isText) finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
+      else finalMessage = `[User melampirkan file: ${currentAttachment.name}]\n\nPesan User:\n${text}`;
     }
 
     chat.messages.push({ role: "user", content: finalMessage });
-    
     removeAttachment();
     if (chat.title === "Obrolan Baru") chat.title = (text || "Lampiran").substring(0, 20) + "...";
     document.getElementById("chat-title-header").textContent = chat.title;
-    inputMessage.value = ""; inputMessage.style.height = "auto"; btnSend.disabled = true; renderChat();
+    
+    const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
+    localStorage.removeItem(draftKey);
+
+    inputMessage.value = ""; 
+    inputMessage.style.height = "auto"; 
+    updateSendButtonState(); 
+    renderChat();
 
     const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
     const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
@@ -745,25 +1223,13 @@
       const res = await fetch('/api/chat', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          apiKey: globalApi.apiKey, 
-          baseUrl: globalApi.baseUrl, 
-          model: modelToUse, 
-          messages: apiMessages,
-          webSearch: isWebSearchActive 
-        })
+        body: JSON.stringify({ apiKey: globalApi.apiKey, baseUrl: globalApi.baseUrl, model: modelToUse, messages: apiMessages, webSearch: isWebSearchActive })
       });
       
-      if (!res.ok) {
-        const errTxt = await res.text();
-        throw new Error(`Vercel Error (${res.status}): ${errTxt}`);
-      }
+      if (!res.ok) { const errTxt = await res.text(); throw new Error(`Vercel Error (${res.status}): ${errTxt}`); }
       const data = await res.json();
       document.getElementById("loading-row").remove();
-      
-      if (limit !== Infinity) {
-        localStorage.setItem(usageKey, usageToday + 1);
-      }
+      if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
 
       const aiText = data.choices?.[0]?.message?.content || "Tidak ada jawaban.";
       chat.messages.push({ role: "assistant", content: aiText });
@@ -774,17 +1240,13 @@
       chat.messages.push({ role: "assistant", content: `❌ Error Sistem: ${err.message}` });
       renderChat();
     }
-    btnSend.disabled = false;
   });
 
-  // ===== PENGATURAN DEV & PEMBAYARAN =====
   document.getElementById("btn-save-api").addEventListener("click", () => {
     const apiKey = document.getElementById("input-api-key").value; 
     const baseUrl = document.getElementById("input-base-url").value;
-    
     let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    gApi.apiKey = apiKey;
-    gApi.baseUrl = baseUrl;
+    gApi.apiKey = apiKey; gApi.baseUrl = baseUrl;
     localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); 
     alert("API Key & Base URL berhasil disimpan!");
   });
@@ -798,15 +1260,60 @@
     document.getElementById("pay-total-price").textContent = "Rp " + price.toLocaleString('id-ID');
     closeModal("upgrade-modal"); document.getElementById("payment-modal").classList.add("active");
   };
+  
+  function compressImage(base64Str, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+      let img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        let canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+    });
+  }
+
   document.getElementById("btn-submit-proof").addEventListener("click", () => {
-    const fileInput = document.getElementById("proof-file"); if (!fileInput.files.length) return alert("Pilih foto!");
+    const fileInput = document.getElementById("proof-file"); 
+    if (!fileInput.files.length) return alert("Pilih foto!");
+    
+    const file = fileInput.files[0];
     const reader = new FileReader();
-    reader.onload = function(e) {
-      let requests = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-      requests.push({ id: "trx_" + Date.now(), username: state.user.username, tier: currentSelectedTier, price: currentSelectedPrice, proof: e.target.result, status: "pending", date: new Date().toLocaleString("id-ID") });
-      localStorage.setItem("milbrav_payment_requests", JSON.stringify(requests));
-      alert("Bukti dikirim! Tunggu konfirmasi Dev."); closeModal("proof-modal"); fileInput.value = "";
-    }; reader.readAsDataURL(fileInput.files[0]);
+    reader.onload = async function(e) {
+      try {
+        const compressedBase64 = await compressImage(e.target.result);
+        
+        let requests = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
+        requests.push({ 
+          id: "trx_" + Date.now(), 
+          username: state.user.username, 
+          tier: currentSelectedTier, 
+          price: currentSelectedPrice, 
+          proof: compressedBase64, 
+          status: "pending", 
+          date: new Date().toLocaleString("id-ID") 
+        });
+        
+        localStorage.setItem("milbrav_payment_requests", JSON.stringify(requests));
+        alert("Bukti berhasil dikirim! Tunggu konfirmasi Dev."); 
+        closeModal("proof-modal"); 
+        fileInput.value = "";
+      } catch (err) {
+        alert("Gagal memproses gambar: " + err.message);
+      }
+    }; 
+    reader.readAsDataURL(file);
   });
 
   document.getElementById("btn-open-dev-panel").addEventListener("click", () => { document.getElementById("dev-panel-modal").classList.add("active"); renderDevPanel(); });
@@ -840,11 +1347,37 @@
   document.getElementById("btn-logout").addEventListener("click", () => {
     if(!confirm("Yakin mau keluar?")) return;
     saveUserChats(); state.user = null; saveState(); viewChat.classList.remove("active"); viewProfile.classList.remove("active"); viewSidebar.classList.remove("active");
-    appContainer.style.display = "none"; authContainer.style.display = "flex"; document.getElementById("auth-username").value = ""; document.getElementById("auth-password").value = "";
+    appContainer.style.display = "none"; 
+    
+    authContainer.style.display = "none";
+    splashContainer.style.display = "none";
+    landingContainer.style.display = "flex";
+    
+    document.getElementById("auth-username").value = ""; document.getElementById("auth-password").value = "";
   });
 
-  loadState();
-  if (state.user) { enterApp(); } else { authContainer.style.display = "flex"; }
+  try {
+    loadState();
+    if (state.user) { 
+      splashContainer.style.display = "none";
+      landingContainer.style.display = "none";
+      enterApp(); 
+    } else { 
+      splashContainer.style.display = "flex";
+      landingContainer.style.display = "none";
+      authContainer.style.display = "none";
+      
+      setTimeout(() => {
+        splashContainer.style.display = "none";
+        landingContainer.style.display = "flex";
+      }, 2000); 
+    }
+  } catch(e) {
+    console.error(e);
+    splashContainer.style.display = "none";
+    landingContainer.style.display = "none";
+    authContainer.style.display = "flex";
+  }
 })();
 </script>
 </body>
