@@ -6,7 +6,7 @@
 <title>Milbrav AI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- LIBRARY BARU: PENERJEMAH MARKDOWN & RUMUS MATEMATIKA -->
+<!-- LIBRARY PENERJEMAH MARKDOWN & RUMUS MATEMATIKA -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -326,7 +326,14 @@
     <div class="settings-section">
       <div class="settings-title">Paket Langganan</div>
       <div class="settings-card">
-        <div class="setting-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="setting-text">Status Paket</span><span class="setting-value" id="current-tier-display">Free</span></div>
+        <div class="setting-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <div style="flex:1;">
+            <span class="setting-text" style="display:block;">Status Paket</span>
+            <span id="expiry-display" style="font-size:11px; color:var(--accent-green); display:none;">Aktif s/d: -</span>
+          </div>
+          <span class="setting-value" id="current-tier-display">Free</span>
+        </div>
         <div class="setting-item" id="btn-show-upgrade"><svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="setting-text text-blue">Beli / Upgrade Paket</span></div>
       </div>
     </div>
@@ -762,13 +769,37 @@
     document.getElementById("dev-bug-modal").classList.add("active");
   });
 
+  // ====== FITUR BARU: CEK EXPIRED DATE ======
   function syncTier() {
     if (!state.user || state.user.isDev) return;
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
     if (users[state.user.username]) {
-      const currentDbTier = users[state.user.username].tier || "free";
-      if (state.user.tier !== currentDbTier) { state.user.tier = currentDbTier; saveState(); }
+      const userData = users[state.user.username];
+      
+      // Cek Tanggal Expired
+      if (userData.expiryDate && Date.now() > userData.expiryDate) {
+          userData.tier = "free";
+          userData.expiryDate = null;
+          localStorage.setItem("milbrav_users", JSON.stringify(users));
+          alert("Masa aktif paket Anda telah habis. Akun Anda dikembalikan ke Free.");
+      }
+
+      const currentDbTier = userData.tier || "free";
+      state.user.tier = currentDbTier;
+      state.user.expiryDate = userData.expiryDate;
+      saveState();
+      
       document.getElementById("current-tier-display").textContent = state.user.tier.toUpperCase();
+      
+      const expiryDisplay = document.getElementById("expiry-display");
+      if (state.user.expiryDate && state.user.tier !== "free") {
+          const dateObj = new Date(state.user.expiryDate);
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          expiryDisplay.textContent = `Aktif s/d: ${dateObj.toLocaleDateString('id-ID', options)}`;
+          expiryDisplay.style.display = "block";
+      } else {
+          expiryDisplay.style.display = "none";
+      }
     }
   }
 
@@ -901,12 +932,13 @@
       if (isRegisterMode) {
         if (username === DEV_USERNAME) return showAuthError("Username dilarang!");
         if (users[username]) return showAuthError("Username sudah dipakai!");
-        users[username] = { password, tier: "free", email: `${username}@gmail.com` };
+        users[username] = { password, tier: "free", email: `${username}@gmail.com`, expiryDate: null };
         localStorage.setItem("milbrav_users", JSON.stringify(users));
         alert("Daftar berhasil! Silakan masuk."); toggleAuthMode(); return;
       }
       if (!users[username] || users[username].password !== password) return showAuthError("Username / Password salah!");
-      state.user = { username, tier: users[username].tier || "free", email: users[username].email };
+      
+      state.user = { username, tier: users[username].tier || "free", email: users[username].email, expiryDate: users[username].expiryDate || null };
       state.chats = []; state.activeChatId = null;
       const raw = localStorage.getItem(`milbrav_chats_${username}`);
       if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
@@ -933,8 +965,9 @@
       document.getElementById("profile-username-display").textContent = uName;
       document.getElementById("sidebar-avatar-initial").textContent = uName.charAt(0).toUpperCase();
       document.getElementById("profile-avatar-initial").textContent = uName.charAt(0).toUpperCase();
-      document.getElementById("current-tier-display").textContent = (state.user && state.user.tier ? state.user.tier : "free").toUpperCase();
       
+      syncTier(); // Panggil cek Expired pas masuk
+
       if (state.user && state.user.isDev) {
         document.getElementById("dev-section").style.display = "block";
         document.getElementById("pdf-section").style.display = "block";
@@ -1170,16 +1203,13 @@
       let contentHtml = "";
 
       if (m.role === 'assistant') {
-          // PARSING MARKDOWN UNTUK AI
           let rawText = m.content;
-          // Ganti format gambar markdown menjadi tag img
           rawText = rawText.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
           
           let parsed = marked.parse(rawText);
           contentHtml = DOMPurify.sanitize(parsed);
           row.innerHTML = `<div class="msg-content markdown-body" style="padding-left: 0;">${contentHtml}</div>`;
       } else {
-          // USER MESSAGE
           if (Array.isArray(m.content)) {
               m.content.forEach(part => {
                   if (part.type === "text") {
@@ -1197,7 +1227,6 @@
     });
     box.scrollTop = box.scrollHeight;
 
-    // RENDER RUMUS MATEMATIKA (KaTeX)
     renderMathInElement(box, {
         delimiters: [
             {left: '$$', right: '$$', display: true},
@@ -1407,14 +1436,28 @@
       container.appendChild(div);
     });
   }
+  
+  // ====== FITUR BARU: DEV TERIMA BAYAR ======
   window.accPayment = function(id) {
-    if(!confirm("Terima pembayaran ini?")) return;
+    if(!confirm("Terima pembayaran ini? Masa aktif akan diset 30 hari.")) return;
     let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
-    const req = reqs.find(r => r.id === id); req.status = "accepted"; localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
+    const req = reqs.find(r => r.id === id); 
+    req.status = "accepted"; 
+    localStorage.setItem("milbrav_payment_requests", JSON.stringify(reqs));
+    
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
-    if (users[req.username]) { users[req.username].tier = req.tier.toLowerCase(); localStorage.setItem("milbrav_users", JSON.stringify(users)); }
-    alert(`Diterima! Paket ${req.username} jadi ${req.tier}.`); renderDevPanel();
+    if (users[req.username]) { 
+        users[req.username].tier = req.tier.toLowerCase(); 
+        // Set expired date 30 hari dari sekarang
+        const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
+        users[req.username].expiryDate = expiryDate;
+        localStorage.setItem("milbrav_users", JSON.stringify(users)); 
+    }
+    
+    alert(`Diterima! Paket ${req.username} jadi ${req.tier} selama 30 hari.`); 
+    renderDevPanel();
   };
+  
   window.rejectPayment = function(id) {
     if(!confirm("Tolak pembayaran ini?")) return;
     let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
