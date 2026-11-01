@@ -153,7 +153,6 @@
   optgroup { background: #1c1c1e; color: var(--accent-blue); font-weight: bold; }
   option { background: #1c1c1e; color: white; font-weight: normal; }
   
-  /* TAMBAHAN: INPUT MANUAL */
   input.custom-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; font-size: 14px; outline: none; margin-bottom: 10px;}
 
   .model-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px; border-radius: 12px; cursor: pointer; border-bottom: 1px solid #2c2c2e; }
@@ -472,9 +471,6 @@
   let state = { user: null, chats: [], activeChatId: null };
   const STORAGE_KEY = "milbrav_chat_app";
   
-  // HAPUS MEMORI ERROR KEMARIN
-  localStorage.removeItem("milbrav_model_mapping");
-  
   function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   
   function loadState() {
@@ -512,7 +508,19 @@
     "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "" }
   };
 
-  // FITUR TARIK DAFTAR MODEL LANGSUNG DARI KUNCIAI
+  function loadModelMapping() {
+    const saved = localStorage.getItem("milbrav_model_mapping");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        for (let key in parsed) {
+          if (MODELS[key]) MODELS[key].apiId = parsed[key];
+        }
+      } catch(e) {}
+    }
+  }
+  loadModelMapping();
+
   window.fetchRealModels = async function() {
     const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     if (!globalApi.apiKey) return alert("Isi API Key dulu di menu profil!");
@@ -784,20 +792,27 @@
         document.getElementById("btn-save-model-choice").style.display = "none";
       }
 
+      // OTOMATIS PILIH MODEL BERDASARKAN TIER (Untuk user biasa)
+      let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+      if (!state.user.isDev) {
+          const tier = (state.user.tier || "free").toLowerCase();
+          if (tier === "free") gApi.model = "milbrav-ai";
+          else if (tier === "premium") gApi.model = "milbrav-rose";
+          else if (tier === "pro" || tier === "proplus") gApi.model = "milbrav-walk";
+          
+          localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+      }
+
       document.getElementById("btn-model-selector").onclick = () => {
-        const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-        tempSelectedModel = globalApi.model || "milbrav-ai";
-        
-        // Reset input agar user wajib milih
-        document.getElementById("select-manual-model").innerHTML = '<option value="">-- Klik Tombol Hijau Diatas Dulu --</option>';
+        tempSelectedModel = gApi.model || "milbrav-ai";
+        document.getElementById("select-manual-model").innerHTML = '<option value="">-- Tarik Otomatis / Ketik Manual --</option>';
         document.getElementById("manual-model-text").value = ""; 
         
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
       };
 
-      const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-      updateModelUI(globalApi.model || "milbrav-ai");
+      updateModelUI(gApi.model || "milbrav-ai");
 
       viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
       if (state.chats && state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
@@ -827,10 +842,16 @@
          div.style.opacity = "0.6";
       }
 
+      // KHUSUS DEV: TAMPILKAN MODEL KUNCIAI DI BAWAH NAMA
+      let descHtml = m.desc;
+      if (state.user.isDev) {
+          descHtml = `Model KunciAI: <span style="color:#10b981; font-weight:bold;">${m.apiId || 'Belum diatur'}</span>`;
+      }
+
       div.innerHTML = `
         <div class="model-info" style="flex:1;">
           <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
-          <p>${m.desc}</p>
+          <p>${descHtml}</p>
         </div>
         ${lockIcon}
         <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -844,8 +865,9 @@
         }
         if (state.user.isDev) {
           tempSelectedModel = key;
-          document.getElementById("select-manual-model").value = ""; // Biarkan kosong, minta klik tombol
-          document.getElementById("manual-model-text").value = ""; 
+          // Kalau dev klik, isi otomatis input text dengan apiId yang sekarang
+          document.getElementById("manual-model-text").value = MODELS[key].apiId || "";
+          document.getElementById("select-manual-model").value = "";
           renderModelList(); 
         } else {
           let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
