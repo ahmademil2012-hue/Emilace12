@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // 1. Set Header CORS biar aman dari blokiran browser
+  // 1. Set CORS biar aman dari blokiran browser
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
@@ -8,18 +8,16 @@ export default async function handler(req, res) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
-  // 2. Handle preflight request (OPTIONS)
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  // 3. Hanya izinkan method POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 4. Ambil data yang dikirim dari Frontend HTML
+  // 2. Ambil data dari Frontend (HTML)
   const { apiKey, baseUrl, model, messages, webSearch } = req.body;
 
   if (!apiKey) {
@@ -28,7 +26,7 @@ export default async function handler(req, res) {
 
   let finalMessages = [...messages];
 
-  // 5. LOGIKA PENCARIAN WEB (Jika tombol "Pencarian Web" di-ON kan)
+  // 3. FITUR PENCARIAN WEB (JIKA TOMBOL WEB SEARCH AKTIF)
   if (webSearch && messages.length > 0) {
     try {
       const lastUserMsg = messages[messages.length - 1].content;
@@ -38,10 +36,10 @@ export default async function handler(req, res) {
       const searchRes = await fetch(searchUrl);
       const searchText = await searchRes.text();
       
-      // Batasi konteks biar ga kebablasan token (maks 4000 karakter)
+      // Batasi teks biar ga kebablasan token
       const context = searchText.substring(0, 4000);
       
-      // Sisipkan hasil pencarian ke dalam prompt sebagai pesan sistem
+      // Sisipkan hasil pencarian sebagai pesan "System"
       finalMessages.unshift({
         role: "system",
         content: `Kamu adalah asisten AI. Berikut adalah hasil pencarian web untuk "${lastUserMsg}":\n\n${context}\n\nJawablah pertanyaan user berdasarkan informasi di atas. Jika tidak ada di atas, jawab dengan pengetahuanmu.`
@@ -52,9 +50,9 @@ export default async function handler(req, res) {
     }
   }
 
-  // 6. KIRIM KE API KUNCIAI
+  // 4. KIRIM KE API KUNCIAI
   try {
-    const cleanBaseUrl = baseUrl.replace(/\/+$/, ''); // Hapus slash di akhir kalau ada
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, ''); // Hapus slash di akhir
     const targetUrl = `${cleanBaseUrl}/chat/completions`;
 
     const response = await fetch(targetUrl, {
@@ -66,14 +64,14 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: model,
         messages: finalMessages,
-        stream: false // Matikan stream biar stabil di Vercel
+        stream: false // Matikan stream agar stabil di Vercel
       })
     });
 
     const dataText = await response.text(); 
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: `KunciAI: ${dataText}` });
+      return res.status(response.status).json({ error: `KunciAI Error: ${dataText}` });
     }
 
     let dataJson;
@@ -83,7 +81,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: `Format bukan JSON: ${dataText.substring(0, 50)}` });
     }
 
-    // 7. Kirim balik jawaban AI ke Frontend
+    // 5. Kirim balik jawaban AI ke Frontend
     res.status(200).json(dataJson);
 
   } catch (error) {
