@@ -7,7 +7,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') { return res.status(405).json({ error: 'Method not allowed' }); }
 
-  // ===== FITUR BARU: TARIK DAFTAR MODEL ASLI DARI KUNCIAI =====
   if (req.body && req.body.action === 'getModels') {
     const { apiKey, baseUrl } = req.body;
     if (!apiKey) return res.status(400).json({ error: 'API Key kosong' });
@@ -24,7 +23,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // ===== FITUR CHAT BIASA =====
   const { apiKey, baseUrl, model, messages, webSearch } = req.body;
   if (!apiKey) return res.status(400).json({ error: 'API Key kosong' });
 
@@ -58,7 +56,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return res.status(404).json({ error: `Model "${model}" tidak ditemukan. Pastikan Bos memilih model dari tombol "Ambil Model Asli".` });
+        return res.status(404).json({ error: `Model "${model}" tidak ditemukan. Pastikan Bos memilih model dari tombol "Ambil Model Asli" atau ketik manual dengan benar.` });
       }
       return res.status(response.status).json({ error: `KunciAI Error: ${dataText}` });
     }
