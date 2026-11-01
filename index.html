@@ -152,6 +152,9 @@
   select.custom-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; font-size: 14px; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ececec%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%, 0 0; background-size: .65em auto, 100%; }
   optgroup { background: #1c1c1e; color: var(--accent-blue); font-weight: bold; }
   option { background: #1c1c1e; color: white; font-weight: normal; }
+  
+  /* TAMBAHAN: INPUT MANUAL */
+  input.custom-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; font-size: 14px; outline: none; margin-bottom: 10px;}
 
   .model-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px; border-radius: 12px; cursor: pointer; border-bottom: 1px solid #2c2c2e; }
   .model-item:last-child { border-bottom: none; }
@@ -330,15 +333,22 @@
     <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
     
+    <!-- KHUSUS DEV: DROPDOWN + MANUAL INPUT -->
     <div class="manual-input-container" id="manual-model-container">
       <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
         Pilih Model KunciAI (Khusus Dev)
-        <span onclick="fetchRealModels()" style="color:var(--accent-green); cursor:pointer; font-size:11px; background:rgba(16,185,129,0.2); padding:4px 8px; border-radius:6px;">🔄 Ambil Model Asli</span>
       </label>
-      <select id="select-manual-model" class="custom-select">
-        <option value="">-- Pilih Model Lain (KunciAI) --</option>
-        <!-- List akan diisi otomatis oleh tombol "Ambil Model Asli" -->
+      
+      <select id="select-manual-model" class="custom-select" style="margin-bottom:10px;">
+        <option value="">-- Tarik Otomatis / Ketik Manual --</option>
       </select>
+      
+      <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <button type="button" onclick="fetchRealModels()" style="flex:1; background:var(--accent-green); color:white; padding:10px; border-radius:8px; font-weight:bold; font-size:12px;">🔄 Tarik Otomatis</button>
+      </div>
+
+      <label style="font-size:11px; color:#888; margin-bottom:4px; display:block;">Atau ketik manual (wajib persis seperti di dashboard):</label>
+      <input type="text" id="manual-model-text" class="custom-input" placeholder="Contoh: gpt-4o atau deepseek-chat">
     </div>
     
     <div class="model-list" id="model-list-container"></div>
@@ -462,6 +472,9 @@
   let state = { user: null, chats: [], activeChatId: null };
   const STORAGE_KEY = "milbrav_chat_app";
   
+  // HAPUS MEMORI ERROR KEMARIN
+  localStorage.removeItem("milbrav_model_mapping");
+  
   function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   
   function loadState() {
@@ -499,26 +512,7 @@
     "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "" }
   };
 
-  function loadModelMapping() {
-    const saved = localStorage.getItem("milbrav_model_mapping");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        for (let key in parsed) {
-          if (MODELS[key]) MODELS[key].apiId = parsed[key];
-        }
-      } catch(e) {}
-    }
-  }
-  loadModelMapping();
-
-  function saveModelMapping() {
-    let map = {};
-    for (let key in MODELS) { map[key] = MODELS[key].apiId; }
-    localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
-  }
-
-  // FITUR BARU: TARIK DAFTAR MODEL LANGSUNG DARI KUNCIAI
+  // FITUR TARIK DAFTAR MODEL LANGSUNG DARI KUNCIAI
   window.fetchRealModels = async function() {
     const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     if (!globalApi.apiKey) return alert("Isi API Key dulu di menu profil!");
@@ -554,7 +548,7 @@
         }
     } catch(e) {
         select.innerHTML = '<option value="">-- Gagal Ambil Model --</option>';
-        alert("Gagal: " + e.message + "\n\nPastikan API Key valid dan ada koneksi internet.");
+        alert("Gagal: " + e.message + "\n\nCoba ketik manual di kotak teks bawah.");
     }
   };
 
@@ -794,8 +788,9 @@
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
         tempSelectedModel = globalApi.model || "milbrav-ai";
         
-        // Cek apakah dropdown kosong (belum pernah ditarik), kalau kosong biarin aja
-        document.getElementById("select-manual-model").value = MODELS[tempSelectedModel].apiId || ""; 
+        // Reset input agar user wajib milih
+        document.getElementById("select-manual-model").innerHTML = '<option value="">-- Klik Tombol Hijau Diatas Dulu --</option>';
+        document.getElementById("manual-model-text").value = ""; 
         
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
@@ -849,7 +844,8 @@
         }
         if (state.user.isDev) {
           tempSelectedModel = key;
-          document.getElementById("select-manual-model").value = MODELS[key].apiId || "";
+          document.getElementById("select-manual-model").value = ""; // Biarkan kosong, minta klik tombol
+          document.getElementById("manual-model-text").value = ""; 
           renderModelList(); 
         } else {
           let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
@@ -867,23 +863,34 @@
     if (!state.user.isDev) return; 
     
     const selectValue = document.getElementById("select-manual-model").value;
+    const manualValue = document.getElementById("manual-model-text").value.trim();
     
-    if (selectValue) {
-      MODELS[tempSelectedModel].apiId = selectValue;
-      saveModelMapping();
+    let finalModelId = "";
+    
+    // Prioritas: Manual input kalau diisi, kalau nggak pakai dropdown
+    if (manualValue) {
+      finalModelId = manualValue;
+    } else if (selectValue) {
+      finalModelId = selectValue;
     }
-    
-    if (!MODELS[tempSelectedModel].apiId) {
-      alert(`Bos, Anda belum memilih Model KunciAI untuk "${MODELS[tempSelectedModel].name}".\n\nSilakan klik "🔄 Ambil Model Asli" lalu pilih dari dropdown!`);
+
+    if (!finalModelId) {
+      alert(`Bos, Anda belum memilih Model KunciAI!\n\nKlik "Tarik Otomatis" atau ketik manual nama modelnya.`);
       return;
     }
+
+    MODELS[tempSelectedModel].apiId = finalModelId;
+    let map = JSON.parse(localStorage.getItem("milbrav_model_mapping") || "{}");
+    map[tempSelectedModel] = finalModelId;
+    localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
 
     let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
     gApi.model = tempSelectedModel;
     localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+    
     updateModelUI(tempSelectedModel);
     closeModal("model-modal");
-    alert(`Berhasil disimpan! ${MODELS[tempSelectedModel].name} menggunakan: ${MODELS[tempSelectedModel].apiId}`);
+    alert(`Berhasil disimpan! ${MODELS[tempSelectedModel].name} menggunakan: ${finalModelId}`);
   });
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
@@ -1064,7 +1071,7 @@
       
       if (!realApiModelId) {
         document.getElementById("loading-row").remove();
-        alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "🔄 Ambil Model Asli", lalu pilih dari dropdown.`);
+        alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "Tarik Otomatis" atau ketik manual nama modelnya.`);
         return;
       }
       
