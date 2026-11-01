@@ -331,67 +331,13 @@
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
     
     <div class="manual-input-container" id="manual-model-container">
-      <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:block; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
+      <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
+        Pilih Model KunciAI (Khusus Dev)
+        <span onclick="fetchRealModels()" style="color:var(--accent-green); cursor:pointer; font-size:11px; background:rgba(16,185,129,0.2); padding:4px 8px; border-radius:6px;">🔄 Ambil Model Asli</span>
+      </label>
       <select id="select-manual-model" class="custom-select">
         <option value="">-- Pilih Model Lain (KunciAI) --</option>
-        <optgroup label="DeepSeek Models">
-          <option value="deepseek-v4.1-flash">deepseek-v4.1-flash</option>
-          <option value="prov3-deepseek-v4.1-flash">prov3-deepseek-v4.1-flash</option>
-          <option value="deepseek-v4-flash">deepseek-v4-flash</option>
-          <option value="deepseek-v4-flash-0731">deepseek-v4-flash-0731</option>
-          <option value="prov3-deepseek-v4-flash">prov3-deepseek-v4-flash</option>
-          <option value="prov3-deepseek-v4-flash-0731">prov3-deepseek-v4-flash-0731</option>
-          <option value="deepseek-v4-pro">deepseek-v4-pro</option>
-          <option value="deepseek-v4-pro-0813">deepseek-v4-pro-0813</option>
-          <option value="prov3-deepseek-v4-pro">prov3-deepseek-v4-pro</option>
-        </optgroup>
-        <optgroup label="Claude Models">
-          <option value="claude-sonnet-4.6">claude-sonnet-4.6</option>
-          <option value="claude-opus-4.6">claude-opus-4.6</option>
-          <option value="claude-opus-4.8">claude-opus-4.8</option>
-          <option value="claude-opus-5">claude-opus-5</option>
-          <option value="prov3-claude-opus-5">prov3-claude-opus-5</option>
-        </optgroup>
-        <optgroup label="OpenAI / GPT Models">
-          <option value="gpt-5.4-mini">gpt-5.4-mini</option>
-          <option value="gpt-5.5">gpt-5.5</option>
-          <option value="gpt-5.6-luna">gpt-5.6-luna</option>
-          <option value="gpt-5.6-sol">gpt-5.6-sol</option>
-          <option value="gpt-5.6-terra">gpt-5.6-terra</option>
-          <option value="gpt-6-astra">gpt-6-astra</option>
-          <option value="gpt-6-luna">gpt-6-luna</option>
-          <option value="gpt-6-sol">gpt-6-sol</option>
-          <option value="gpt-6.1-sol">gpt-6.1-sol</option>
-          <option value="prov3-gpt-5.5">prov3-gpt-5.5</option>
-          <option value="prov3-gpt-5.6-luna">prov3-gpt-5.6-luna</option>
-          <option value="prov3-gpt-5.6-sol">prov3-gpt-5.6-sol</option>
-        </optgroup>
-        <optgroup label="GLM / Zhipu Models">
-          <option value="glm-5.3-flash">glm-5.3-flash</option>
-          <option value="glm-5.3-flashx">glm-5.3-flashx</option>
-          <option value="glm-5.0-turbo">glm-5.0-turbo</option>
-          <option value="glm-5.1">glm-5.1</option>
-          <option value="glm-5.2">glm-5.2</option>
-          <option value="glm-5.3">glm-5.3</option>
-          <option value="prov3-glm-5.2">prov3-glm-5.2</option>
-        </optgroup>
-        <optgroup label="Grok Models">
-          <option value="grok-4.5">grok-4.5</option>
-          <option value="grok-4.6">grok-4.6</option>
-          <option value="grok-4.7">grok-4.7</option>
-          <option value="prov3-grok-4.5">prov3-grok-4.5</option>
-        </optgroup>
-        <optgroup label="Lainnya (Kimi, Qwen, Minimax)">
-          <option value="kimi-k2.5">kimi-k2.5</option>
-          <option value="kimi-k2.7">kimi-k2.7</option>
-          <option value="kimi-k3">kimi-k3</option>
-          <option value="prov3-kimi-k2.5">prov3-kimi-k2.5</option>
-          <option value="minimax-m2.7">minimax-m2.7</option>
-          <option value="minimax-m3">minimax-m3</option>
-          <option value="qwen3.7-max">qwen3.7-max</option>
-          <option value="qwen3.7-plus">qwen3.7-plus</option>
-          <option value="qwen3.8-max">qwen3.8-max</option>
-        </optgroup>
+        <!-- List akan diisi otomatis oleh tombol "Ambil Model Asli" -->
       </select>
     </div>
     
@@ -571,6 +517,46 @@
     for (let key in MODELS) { map[key] = MODELS[key].apiId; }
     localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
   }
+
+  // FITUR BARU: TARIK DAFTAR MODEL LANGSUNG DARI KUNCIAI
+  window.fetchRealModels = async function() {
+    const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    if (!globalApi.apiKey) return alert("Isi API Key dulu di menu profil!");
+
+    const select = document.getElementById("select-manual-model");
+    select.innerHTML = '<option value="">⏳ Menarik data dari server...</option>';
+
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'getModels', 
+                apiKey: globalApi.apiKey, 
+                baseUrl: globalApi.baseUrl || "https://kunciai.id/v1" 
+            })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Gagal mengambil data");
+
+        select.innerHTML = '<option value="">-- Pilih Model Valid --</option>';
+        if (data.data && Array.isArray(data.data)) {
+            data.data.forEach(m => {
+                const opt = document.createElement("option");
+                opt.value = m.id;
+                opt.textContent = m.id;
+                select.appendChild(opt);
+            });
+            alert("Berhasil! Silakan pilih model dari daftar.");
+        } else {
+            select.innerHTML = '<option value="">(Format data tidak dikenali)</option>';
+        }
+    } catch(e) {
+        select.innerHTML = '<option value="">-- Gagal Ambil Model --</option>';
+        alert("Gagal: " + e.message + "\n\nPastikan API Key valid dan ada koneksi internet.");
+    }
+  };
 
   function getWaktuLapor() {
     const now = new Date();
@@ -807,8 +793,10 @@
       document.getElementById("btn-model-selector").onclick = () => {
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
         tempSelectedModel = globalApi.model || "milbrav-ai";
-        // Tampilkan model yang sedang terpasang di dropdown
+        
+        // Cek apakah dropdown kosong (belum pernah ditarik), kalau kosong biarin aja
         document.getElementById("select-manual-model").value = MODELS[tempSelectedModel].apiId || ""; 
+        
         renderModelList();
         document.getElementById("model-modal").classList.add("active");
       };
@@ -861,7 +849,6 @@
         }
         if (state.user.isDev) {
           tempSelectedModel = key;
-          // Update dropdown saat ganti model
           document.getElementById("select-manual-model").value = MODELS[key].apiId || "";
           renderModelList(); 
         } else {
@@ -887,7 +874,7 @@
     }
     
     if (!MODELS[tempSelectedModel].apiId) {
-      alert(`Bos, Anda belum memilih Model KunciAI untuk "${MODELS[tempSelectedModel].name}". Silakan pilih dari dropdown!`);
+      alert(`Bos, Anda belum memilih Model KunciAI untuk "${MODELS[tempSelectedModel].name}".\n\nSilakan klik "🔄 Ambil Model Asli" lalu pilih dari dropdown!`);
       return;
     }
 
@@ -1077,7 +1064,7 @@
       
       if (!realApiModelId) {
         document.getElementById("loading-row").remove();
-        alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, pilih Milbrav tersebut, dan tentukan Model KunciAI-nya di dropdown atas.`);
+        alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "🔄 Ambil Model Asli", lalu pilih dari dropdown.`);
         return;
       }
       
