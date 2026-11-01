@@ -6,12 +6,14 @@
 <title>Milbrav AI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- LIBRARY PENERJEMAH MARKDOWN & RUMUS MATEMATIKA -->
+<!-- LIBRARY PENERJEMAH MARKDOWN, MATH, & HIGHLIGHT KODE -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
 <style>
   :root {
@@ -82,7 +84,7 @@
   #view-chat { position: absolute; inset: 0; background: var(--bg-main); display: none; flex-direction: column; z-index: 20; }
   #view-chat.active { display: flex; }
   .chat-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .chat-header h2 { font-size: 18px; font-weight: 600; }
+  .chat-header h2 { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
   .chat-messages { flex: 1; overflow-y: auto; min-height: 0; padding: 10px 20px 20px; }
   .message { margin-bottom: 24px; display: flex; gap: 12px; }
@@ -101,9 +103,17 @@
   .msg-content ul, .msg-content ol { margin-left: 20px; margin-bottom: 10px; }
   .msg-content li { margin-bottom: 5px; }
   .msg-content p { margin-bottom: 10px; }
-  .msg-content pre { background: #111; padding: 10px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
-  .msg-content code { font-family: monospace; background: #222; padding: 2px 4px; border-radius: 4px; color: #10b981;}
-  .msg-content pre code { background: transparent; padding: 0; color: #ececec; }
+  
+  /* KURSOR KETIK */
+  .typing-cursor { display: inline-block; width: 6px; height: 16px; background-color: var(--accent-blue); animation: blink-cursor 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+  @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* CSS UNTUK BLOK KODE & TOMBOL SALIN */
+  .code-block-wrapper { position: relative; background: #1e1e1e; border-radius: 8px; margin-bottom: 15px; overflow: hidden; border: 1px solid #333; }
+  .code-block-header { display: flex; justify-content: space-between; align-items: center; background: #2d2d2d; padding: 6px 12px; font-size: 12px; color: #aaa; }
+  .copy-btn { background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+  .copy-btn:hover { color: #fff; }
+  .code-block-wrapper pre { margin: 0; padding: 12px; overflow-x: auto; background: transparent; }
 
   .chat-input-area { padding: 10px 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); flex-shrink: 0; }
   .chat-input-box { background: var(--bg-input-box); border: 1px solid #333; border-radius: 24px; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
@@ -296,6 +306,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h2 id="chat-title-header">Milbrav AI</h2>
+      <button type="button" class="icon-btn" id="btn-new-chat-header" style="margin-left: auto;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+      </button>
     </div>
     <div class="chat-messages" id="chat-messages"></div>
     
@@ -616,6 +629,37 @@
     }
   }
 
+  // RENDER KODE MARKDOWN CUSTOM (DENGAN TOMBOL SALIN)
+  marked.use({
+    renderer: {
+        code(code, infostring) {
+            const lang = (infostring || '').match(/\S*/)[0];
+            const validLang = hljs.getLanguage(lang) ? lang : 'plaintext';
+            const highlighted = hljs.highlight(code, { language: validLang }).value;
+            return `<div class="code-block-wrapper">
+                        <div class="code-block-header">
+                            <span>${validLang}</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                Salin
+                            </button>
+                        </div>
+                        <pre><code class="hljs language-${validLang}">${highlighted}</code></pre>
+                    </div>`;
+        }
+    }
+  });
+
+  window.copyCode = function(btn) {
+      const pre = btn.closest('.code-block-wrapper').querySelector('pre');
+      const code = pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+          const orig = btn.innerHTML;
+          btn.innerHTML = "Tersalin!";
+          setTimeout(() => btn.innerHTML = orig, 2000);
+      });
+  };
+
   let isRegisterMode = false;
   let tempSelectedModel = "";
   let currentAttachment = null;
@@ -769,14 +813,12 @@
     document.getElementById("dev-bug-modal").classList.add("active");
   });
 
-  // ====== FITUR BARU: CEK EXPIRED DATE ======
   function syncTier() {
     if (!state.user || state.user.isDev) return;
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
     if (users[state.user.username]) {
       const userData = users[state.user.username];
       
-      // Cek Tanggal Expired
       if (userData.expiryDate && Date.now() > userData.expiryDate) {
           userData.tier = "free";
           userData.expiryDate = null;
@@ -926,7 +968,13 @@
       if (!username || !password) return showAuthError("Isi semua data!");
       if (username === DEV_USERNAME && password === DEV_PASSWORD) {
         state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
-        state.chats = []; state.activeChatId = null; saveState(); enterApp(); return;
+        
+        // LOAD CHAT HISTORY UNTUK DEV
+        state.chats = []; 
+        const raw = localStorage.getItem(`milbrav_chats_${DEV_USERNAME}`);
+        if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
+        
+        state.activeChatId = null; saveState(); enterApp(); return;
       }
       let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
       if (isRegisterMode) {
@@ -966,7 +1014,7 @@
       document.getElementById("sidebar-avatar-initial").textContent = uName.charAt(0).toUpperCase();
       document.getElementById("profile-avatar-initial").textContent = uName.charAt(0).toUpperCase();
       
-      syncTier(); // Panggil cek Expired pas masuk
+      syncTier(); 
 
       if (state.user && state.user.isDev) {
         document.getElementById("dev-section").style.display = "block";
@@ -1113,6 +1161,7 @@
   document.getElementById("btn-open-profile").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewProfile.classList.add("active"); syncTier(); });
   document.getElementById("btn-close-profile").addEventListener("click", () => { viewProfile.classList.remove("active"); viewSidebar.classList.add("active"); });
   document.getElementById("btn-new-chat").addEventListener("click", () => { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); createNewChat(false); });
+  document.getElementById("btn-new-chat-header").addEventListener("click", () => { createNewChat(false); });
 
   function renderHistory() {
     const list = document.getElementById("sidebar-history"); list.innerHTML = "";
@@ -1193,22 +1242,63 @@
   
   function saveUserChats() { if (state.user) localStorage.setItem(`milbrav_chats_${state.user.username}`, JSON.stringify(state.chats)); }
   
-  // ====== FITUR RENDER MARKDOWN & MATH ======
-  function renderChat() {
+  // ====== FITUR EFEK KETIK ======
+  async function typeMessage(element, fullText) {
+      element.innerHTML = '<span class="typing-cursor"></span>';
+      
+      let i = 0;
+      const speed = 15; // ms per karakter (15ms = cukup cepat)
+      
+      return new Promise(resolve => {
+          const timer = setInterval(() => {
+              i += 3; // Ngetik 3 huruf sekali jalan biar gak terlalu lambat
+              
+              let partial = fullText.substring(0, i);
+              // Escape HTML tags biar ga render markdown setengah jalan
+              let escaped = partial.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              element.innerHTML = escaped.replace(/\n/g, '<br>') + '<span class="typing-cursor"></span>';
+              
+              // Auto scroll ke bawah
+              const chatBox = document.getElementById("chat-messages");
+              chatBox.scrollTop = chatBox.scrollHeight;
+
+              if (i >= fullText.length) {
+                  clearInterval(timer);
+                  // Render Markdown final
+                  element.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
+                  renderMathInElement(element, {
+                      delimiters: [
+                          {left: '$$', right: '$$', display: true},
+                          {left: '$', right: '$', display: false},
+                          {left: '\\(', right: '\\)', display: false},
+                          {left: '\\[', right: '\\]', display: true}
+                      ],
+                      throwOnError: false
+                  });
+                  resolve();
+              }
+          }, speed);
+      });
+  }
+
+  function renderChat(typingMode = false) {
     const chat = state.chats.find(c => c.id === state.activeChatId);
     const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
     
-    chat.messages.forEach(m => {
+    chat.messages.forEach((m, index) => {
       const row = document.createElement("div"); row.className = "message " + m.role;
       let contentHtml = "";
 
       if (m.role === 'assistant') {
-          let rawText = m.content;
-          rawText = rawText.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
-          
-          let parsed = marked.parse(rawText);
-          contentHtml = DOMPurify.sanitize(parsed);
-          row.innerHTML = `<div class="msg-content markdown-body" style="padding-left: 0;">${contentHtml}</div>`;
+          if (typingMode && index === chat.messages.length - 1) {
+              // Biarkan kosong untuk efek ngetik
+              row.innerHTML = `<div class="msg-content markdown-body" id="typing-target" style="padding-left: 0;"></div>`;
+          } else {
+              let rawText = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image">');
+              let parsed = marked.parse(rawText);
+              contentHtml = DOMPurify.sanitize(parsed);
+              row.innerHTML = `<div class="msg-content markdown-body" style="padding-left: 0;">${contentHtml}</div>`;
+          }
       } else {
           if (Array.isArray(m.content)) {
               m.content.forEach(part => {
@@ -1227,15 +1317,17 @@
     });
     box.scrollTop = box.scrollHeight;
 
-    renderMathInElement(box, {
-        delimiters: [
-            {left: '$$', right: '$$', display: true},
-            {left: '$', right: '$', display: false},
-            {left: '\\(', right: '\\)', display: false},
-            {left: '\\[', right: '\\]', display: true}
-        ],
-        throwOnError: false
-    });
+    if (!typingMode) {
+        renderMathInElement(box, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+        });
+    }
   }
 
   window.handleFileSelect = async function(input) {
@@ -1335,7 +1427,8 @@
     const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
     localStorage.removeItem(draftKey);
 
-    inputMessage.value = ""; inputMessage.style.height = "auto"; updateSendButtonState(); renderChat();
+    inputMessage.value = ""; inputMessage.style.height = "auto"; updateSendButtonState(); 
+    renderChat(); // Render chat tanpa efek ngetik dulu
 
     const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
     const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
@@ -1367,7 +1460,16 @@
 
       const aiText = data.choices?.[0]?.message?.content || "Tidak ada jawaban.";
       chat.messages.push({ role: "assistant", content: aiText });
-      saveUserChats(); renderChat();
+      saveUserChats();
+      
+      // Render chat dengan efek ngetik
+      renderChat(true);
+      const typingTarget = document.getElementById("typing-target");
+      if (typingTarget) {
+          await typeMessage(typingTarget, aiText);
+      } else {
+          renderChat(); // Fallback
+      }
     } catch(err) {
       if(document.getElementById("loading-row")) document.getElementById("loading-row").remove();
       alert("Gagal mengambil respons.\nDetail Error: " + err.message);
@@ -1436,8 +1538,6 @@
       container.appendChild(div);
     });
   }
-  
-  // ====== FITUR BARU: DEV TERIMA BAYAR ======
   window.accPayment = function(id) {
     if(!confirm("Terima pembayaran ini? Masa aktif akan diset 30 hari.")) return;
     let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
@@ -1448,7 +1548,6 @@
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
     if (users[req.username]) { 
         users[req.username].tier = req.tier.toLowerCase(); 
-        // Set expired date 30 hari dari sekarang
         const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
         users[req.username].expiryDate = expiryDate;
         localStorage.setItem("milbrav_users", JSON.stringify(users)); 
@@ -1457,7 +1556,6 @@
     alert(`Diterima! Paket ${req.username} jadi ${req.tier} selama 30 hari.`); 
     renderDevPanel();
   };
-  
   window.rejectPayment = function(id) {
     if(!confirm("Tolak pembayaran ini?")) return;
     let reqs = JSON.parse(localStorage.getItem("milbrav_payment_requests") || "[]");
