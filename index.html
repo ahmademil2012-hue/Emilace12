@@ -621,11 +621,11 @@
   const btnSend = document.getElementById("btn-send");
 
   let MODELS = {
-  "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "deepseek-v4-flash" },
-    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "gpt-4o-mini" },
-    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "claude-3-5-sonnet" },
-    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "gpt-4o" }
-  };
+  "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "" },
+  "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "" },
+  "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "" },
+  "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "" }
+};
 
   function loadModelMapping() {
     const saved = localStorage.getItem("milbrav_model_mapping");
