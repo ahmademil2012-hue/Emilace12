@@ -1126,10 +1126,20 @@
           const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : "";
           
           if (!realApiModelId) {
-            document.getElementById("loading-row").remove();
-            alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "Tarik Otomatis" atau ketik manual nama modelnya.`);
-            return;
-          }
+  document.getElementById("loading-row").remove();
+  
+  if (state.user.isDev) {
+    // Tampilan untuk DEV: Kasih tau buat setting
+    alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan buka menu Profil > Pemilihan Model, lalu simpan modelnya.`);
+  } else {
+    // Tampilan untuk USER BIASA: Kasih pesan chat yang sopan
+    const errorMsg = `⚠️ **Sistem Maintenance**\n\nMaaf, sistem AI saat ini sedang dalam perbaikan oleh Developer. Silakan coba beberapa saat lagi.`;
+    chat.messages.push({ role: "assistant", content: errorMsg });
+    saveUserChats(); 
+    renderChat();
+  }
+  return;
+}
           
           const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
 
