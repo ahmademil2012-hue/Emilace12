@@ -581,13 +581,30 @@
   
   function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   
-  function loadState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} }
-    if (state.user && state.user.username) {
-      const userChatsRaw = localStorage.getItem(`milbrav_chats_${state.user.username}`);
-      if (userChatsRaw) { try { state.chats = JSON.parse(userChatsRaw); } catch(e) {} }
+  async function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} }
+  if (state.user && state.user.username) {
+    const userChatsRaw = localStorage.getItem(`milbrav_chats_${state.user.username}`);
+    if (userChatsRaw) { try { state.chats = JSON.parse(userChatsRaw); } catch(e) {} }
+  }
+  
+  // Baca setelan dari GitHub lewat chat.js
+  try {
+    const configRes = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getConfig' })
+    });
+    if (configRes.ok) {
+      const configData = await configRes.json();
+      for (let key in configData) {
+          if (MODELS[key]) { MODELS[key].apiId = configData[key]; }
+      }
+      localStorage.setItem("milbrav_model_mapping", JSON.stringify(configData));
     }
+  } catch(e) { console.log("Gagal load config global:", e); }
+}
   }
 
   marked.use({
@@ -919,16 +936,43 @@
     });
   }
 
-  document.getElementById("btn-save-model-choice").addEventListener("click", () => {
-    if (!state.user.isDev) return; 
-    const selectValue = document.getElementById("select-manual-model").value; const manualValue = document.getElementById("manual-model-text").value.trim();
-    let finalModelId = manualValue || selectValue;
-    if (!finalModelId) { alert(`Bos, Anda belum memilih Model KunciAI!`); return; }
-    MODELS[tempSelectedModel].apiId = finalModelId;
-    let map = JSON.parse(localStorage.getItem("milbrav_model_mapping") || "{}"); map[tempSelectedModel] = finalModelId; localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
-    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}"); gApi.model = tempSelectedModel; localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-    updateModelUI(tempSelectedModel); closeModal("model-modal"); alert(`Berhasil disimpan!`);
-  });
+  document.getElementById("btn-save-model-choice").addEventListener("click", async () => {
+  if (!state.user.isDev) return; 
+  
+  const selectValue = document.getElementById("select-manual-model").value; 
+  const manualValue = document.getElementById("manual-model-text").value.trim();
+  let finalModelId = manualValue || selectValue;
+  
+  if (!finalModelId) { alert(`Bos, Anda belum memilih Model KunciAI!`); return; }
+  
+  MODELS[tempSelectedModel].apiId = finalModelId;
+  let map = JSON.parse(localStorage.getItem("milbrav_model_mapping") || "{}"); 
+  map[tempSelectedModel] = finalModelId; 
+  localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
+  
+  let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}"); 
+  gApi.model = tempSelectedModel; 
+  localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+  
+  // Simpan setelan ke GitHub lewat chat.js
+  try {
+      const saveRes = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'saveConfig', key: tempSelectedModel, apiId: finalModelId })
+      });
+      if(saveRes.ok) {
+          alert(`Mantap! ${MODELS[tempSelectedModel].name} sekarang pakai ${finalModelId} secara Global.`);
+      } else {
+          alert(`Tersimpan di HP ini, tapi gagal simpan ke GitHub.`);
+      }
+  } catch(e) {
+      alert(`Gagal simpan ke GitHub: ${e.message}`);
+  }
+  
+  updateModelUI(tempSelectedModel); 
+  closeModal("model-modal"); 
+});
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
   window.closeModal = closeModal;
