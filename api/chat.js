@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return res.status(404).json({ error: `Model "${model}" tidak ditemukan. Pastikan Bos memilih model dari tombol "Ambil Model Asli" atau ketik manual dengan benar.` });
+        return res.status(404).json({ error: `Model "${model}" tidak ditemukan.` });
       }
       return res.status(response.status).json({ error: `KunciAI Error: ${dataText}` });
     }
