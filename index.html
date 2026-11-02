@@ -419,6 +419,8 @@
         <div class="setting-item" id="btn-open-dev-panel"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span class="setting-text" style="color:#e74c3c;">Panel Konfirmasi Pembayaran</span></div>
         <div class="setting-item" id="btn-view-user-chats"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="setting-text" style="color:#e74c3c;">Monitoring Chat User</span></div>
         <div class="setting-item" id="btn-view-bug-reports"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="setting-text" style="color:#e74c3c;">Laporan Bug by User</span></div>
+        <!-- FITUR BARU: LIST USER -->
+        <div class="setting-item" id="btn-view-users-list"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="setting-text" style="color:#e74c3c;">Daftar User Terdaftar</span></div>
       </div>
     </div>
     
@@ -426,28 +428,18 @@
   </div>
 </div>
 
+<!-- MODAL-MODAL -->
 <div id="model-modal" class="modal-overlay">
   <div class="bottom-sheet">
     <div class="sheet-header"><button type="button" class="close-btn" onclick="closeModal('model-modal')">✕</button><h3>Pemilihan model</h3></div>
     <div class="sub-header-text" id="model-sub-header">Stel AI yang Anda mau <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-    
     <div class="manual-input-container" id="manual-model-container">
-      <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
-        Pilih Model KunciAI (Khusus Dev)
-      </label>
-      
-      <select id="select-manual-model" class="custom-select" style="margin-bottom:10px;">
-        <option value="">-- Tarik Otomatis / Ketik Manual --</option>
-      </select>
-      
-      <div style="display:flex; gap:8px; margin-bottom:10px;">
-        <button type="button" onclick="fetchRealModels()" style="flex:1; background:var(--accent-green); color:white; padding:10px; border-radius:8px; font-weight:bold; font-size:12px;">🔄 Tarik Otomatis</button>
-      </div>
-
-      <label style="font-size:11px; color:#888; margin-bottom:4px; display:block;">Atau ketik manual (wajib persis seperti di dashboard):</label>
+      <label style="font-size:12px; color:var(--accent-blue); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">Pilih Model KunciAI (Khusus Dev)</label>
+      <select id="select-manual-model" class="custom-select" style="margin-bottom:10px;"><option value="">-- Tarik Otomatis / Ketik Manual --</option></select>
+      <div style="display:flex; gap:8px; margin-bottom:10px;"><button type="button" onclick="fetchRealModels()" style="flex:1; background:var(--accent-green); color:white; padding:10px; border-radius:8px; font-weight:bold; font-size:12px;">🔄 Tarik Otomatis</button></div>
+      <label style="font-size:11px; color:#888; margin-bottom:4px; display:block;">Atau ketik manual:</label>
       <input type="text" id="manual-model-text" class="custom-input" placeholder="Contoh: gpt-4o atau deepseek-chat">
     </div>
-    
     <div class="model-list" id="model-list-container"></div>
     <button type="button" class="modal-btn primary" id="btn-save-model-choice" style="margin-top: 24px;">Simpan Pilihan</button>
   </div>
@@ -464,113 +456,48 @@
     <input type="file" id="input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleFileSelect(this)">
     <input type="file" id="input-photo" accept="image/*" style="display:none" onchange="handleFileSelect(this)">
     <input type="file" id="input-file" accept=".txt,.csv,.json,.pdf,.doc,.docx" style="display:none" onchange="handleFileSelect(this)">
-
-    <div class="plus-list-item" onclick="checkPremium('Proyek')">
-      <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><div class="info"><h4>Tambahkan ke proyek</h4><p>Tidak ada</p></div></div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="plus-list-item" onclick="checkPremium('Pencarian Web')">
-      <div class="plus-list-left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <div class="info"><h4>Pencarian web</h4></div>
-      </div>
-      <div class="toggle-switch" id="toggle-web-search"></div>
-    </div>
-    <div class="plus-list-item" onclick="checkPremium('Generate Gambar')">
-      <div class="plus-list-left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <div class="info"><h4>Generate Gambar</h4></div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="plus-list-item" onclick="checkPremium('Memori')">
-      <div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><div class="info"><h4>Memori</h4></div></div>
-      <div class="toggle-switch"></div>
-    </div>
+    <div class="plus-list-item" onclick="checkPremium('Proyek')"><div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><div class="info"><h4>Tambahkan ke proyek</h4><p>Tidak ada</p></div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="plus-list-item" onclick="checkPremium('Pencarian Web')"><div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><div class="info"><h4>Pencarian web</h4></div></div><div class="toggle-switch" id="toggle-web-search"></div></div>
+    <div class="plus-list-item" onclick="checkPremium('Generate Gambar')"><div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="info"><h4>Generate Gambar</h4></div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="plus-list-item" onclick="checkPremium('Memori')"><div class="plus-list-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><div class="info"><h4>Memori</h4></div></div><div class="toggle-switch"></div></div>
   </div>
 </div>
 
-<div id="upgrade-modal" class="modal-overlay center">
-  <div class="modal-content">
-    <h3>Pilih Paket</h3>
-    <button type="button" class="modal-btn outline" onclick="showPayment('Premium', 17000)">Premium - Rp 17.000</button>
-    <button type="button" class="modal-btn outline" onclick="showPayment('Pro', 25000)">Pro - Rp 25.000</button>
-    <button type="button" class="modal-btn outline" onclick="showPayment('Pro+', 45000)">Pro+ - Rp 45.000</button>
-    <button type="button" class="modal-btn primary" onclick="closeModal('upgrade-modal')" style="background:#333; color:white; margin-top:20px;">Batal</button>
-  </div>
-</div>
+<div id="upgrade-modal" class="modal-overlay center"><div class="modal-content"><h3>Pilih Paket</h3><button type="button" class="modal-btn outline" onclick="showPayment('Premium', 17000)">Premium - Rp 17.000</button><button type="button" class="modal-btn outline" onclick="showPayment('Pro', 25000)">Pro - Rp 25.000</button><button type="button" class="modal-btn outline" onclick="showPayment('Pro+', 45000)">Pro+ - Rp 45.000</button><button type="button" class="modal-btn primary" onclick="closeModal('upgrade-modal')" style="background:#333; color:white; margin-top:20px;">Batal</button></div></div>
+
 <div id="payment-modal" class="modal-overlay center">
   <div class="modal-content">
-    <h3>Pembayaran</h3>
-    <p style="text-align:center; color:var(--text-muted);" id="pay-tier-name">Paket</p>
-    <div class="total-price" id="pay-total-price">Rp 0</div>
-    <div class="qris-container">
-      <img src="https://cdn.phototourl.com/member/2026-10-31-7aac9dfe-fcd0-4346-a3e1-4c1ebb921f36.jpg" alt="QRIS">
-      <p style="color:black; font-size:12px; margin-top:8px;">Scan QRIS di atas</p>
-    </div>
-    <button type="button" class="modal-btn success" id="btn-sudah-bayar">Saya Sudah Bayar</button>
-    <button type="button" class="modal-btn primary" onclick="closeModal('payment-modal')" style="background:#333; color:white;">Batal</button>
+    <h3>Pembayaran</h3><p style="text-align:center; color:var(--text-muted);" id="pay-tier-name">Paket</p><div class="total-price" id="pay-total-price">Rp 0</div>
+    <div class="qris-container"><img src="https://cdn.phototourl.com/member/2026-10-31-7aac9dfe-fcd0-4346-a3e1-4c1ebb921f36.jpg" alt="QRIS"><p style="color:black; font-size:12px; margin-top:8px;">Scan QRIS di atas</p></div>
+    <button type="button" class="modal-btn success" id="btn-sudah-bayar">Saya Sudah Bayar</button><button type="button" class="modal-btn primary" onclick="closeModal('payment-modal')" style="background:#333; color:white;">Batal</button>
   </div>
 </div>
+
 <div id="proof-modal" class="modal-overlay center">
   <div class="modal-content">
     <h3>Kirim Bukti Transfer</h3>
     <p style="text-align:center; font-size:14px; margin-bottom:16px;">Pilih foto/screenshot struk pembayaran Anda.</p>
-    
-    <!-- TRIK TRANSPARAN OVERLAY: Input asli disembunyiin tapi nutupin seluruh kotak label -->
     <label class="custom-file-upload" id="proof-upload-label" style="position: relative; overflow: hidden;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <span id="proof-file-name">Ketuk untuk memilih foto</span>
-        
-        <!-- INPUT ASLI DITARUH DI SINI, TRANSPARAN & NUTUPI SEMUA -->
-        <input type="file" id="proof-file" accept="image/*" onchange="updateProofFileName(this)" 
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 99;">
+        <input type="file" id="proof-file" accept="image/*" onchange="updateProofFileName(this)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 99;">
     </label>
-
     <button type="button" class="modal-btn primary" id="btn-submit-proof" style="margin-top: 20px;">Kirim Bukti</button>
     <button type="button" class="modal-btn outline" onclick="closeModal('proof-modal')">Batal</button>
   </div>
 </div>
-<div id="dev-panel-modal" class="modal-overlay center">
+
+<div id="dev-panel-modal" class="modal-overlay center"><div class="modal-content" style="max-width: 500px;"><h3>Panel Konfirmasi Pembayaran</h3><div id="dev-payment-list" style="margin-top:16px;"></div><button type="button" class="modal-btn primary" onclick="closeModal('dev-panel-modal')" style="margin-top:16px;">Tutup</button></div></div>
+<div id="dev-user-chats-modal" class="modal-overlay center"><div class="modal-content" style="max-width: 600px; width: 95%;"><h3>Monitoring Chat User</h3><select id="dev-select-user" class="custom-select" style="margin-bottom: 16px;"><option value="">-- Pilih User --</option></select><div id="dev-chat-display" style="background: #111; padding: 12px; border-radius: 12px; height: 60vh; overflow-y: auto;"><p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p></div><button type="button" class="modal-btn primary" onclick="closeModal('dev-user-chats-modal')" style="margin-top: 16px;">Tutup</button></div></div>
+<div id="user-bug-modal" class="modal-overlay center"><div class="modal-content"><h3>Laporan Bug System</h3><p style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted);">Jelaskan bug atau error yang Anda temui.</p><textarea id="input-bug-report" placeholder="Contoh: Ai nya bnyk bug..." style="width:100%; height:100px; padding:12px; border-radius:8px; background:#111; border:1px solid #333; color:white; outline:none; resize:none; margin-bottom:16px;"></textarea><button type="button" class="modal-btn primary" id="btn-submit-bug">Kirim Laporan</button><button type="button" class="modal-btn outline" onclick="closeModal('user-bug-modal')">Batal</button></div></div>
+<div id="dev-bug-modal" class="modal-overlay center"><div class="modal-content" style="max-width: 500px;"><h3>Laporan Bug by User</h3><div id="dev-bug-list" style="height: 60vh; overflow-y: auto; margin-top:16px;"></div><button type="button" class="modal-btn primary" onclick="closeModal('dev-bug-modal')" style="margin-top:16px;">Tutup</button></div></div>
+
+<!-- MODAL LIST USER BARU -->
+<div id="dev-users-modal" class="modal-overlay center">
   <div class="modal-content" style="max-width: 500px;">
-    <h3>Panel Konfirmasi Pembayaran</h3>
-    <div id="dev-payment-list" style="margin-top:16px;"></div>
-    <button type="button" class="modal-btn primary" onclick="closeModal('dev-panel-modal')" style="margin-top:16px;">Tutup</button>
-  </div>
-</div>
-
-<div id="dev-user-chats-modal" class="modal-overlay center">
-  <div class="modal-content" style="max-width: 600px; width: 95%;">
-    <h3>Monitoring Chat User</h3>
-    <select id="dev-select-user" class="custom-select" style="margin-bottom: 16px;">
-      <option value="">-- Pilih User --</option>
-    </select>
-    <div id="dev-chat-display" style="background: #111; padding: 12px; border-radius: 12px; height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>
-    </div>
-    <button type="button" class="modal-btn primary" onclick="closeModal('dev-user-chats-modal')" style="margin-top: 16px;">Tutup</button>
-  </div>
-</div>
-
-<div id="user-bug-modal" class="modal-overlay center">
-  <div class="modal-content">
-    <h3>Laporan Bug System</h3>
-    <p style="text-align:center; font-size:14px; margin-bottom:16px; color:var(--text-muted);">Jelaskan bug atau error yang Anda temui.</p>
-    <textarea id="input-bug-report" placeholder="Contoh: Ai nya bnyk bug..." style="width:100%; height:100px; padding:12px; border-radius:8px; background:#111; border:1px solid #333; color:white; outline:none; resize:none; margin-bottom:16px;"></textarea>
-    <button type="button" class="modal-btn primary" id="btn-submit-bug">Kirim Laporan</button>
-    <button type="button" class="modal-btn outline" onclick="closeModal('user-bug-modal')">Batal</button>
-  </div>
-</div>
-
-<div id="dev-bug-modal" class="modal-overlay center">
-  <div class="modal-content" style="max-width: 500px;">
-    <h3>Laporan Bug by User</h3>
-    <div id="dev-bug-list" style="height: 60vh; overflow-y: auto; margin-top:16px;"></div>
-    <button type="button" class="modal-btn primary" onclick="closeModal('dev-bug-modal')" style="margin-top:16px;">Tutup</button>
+    <h3>Daftar User Terdaftar</h3>
+    <div id="dev-users-list" style="height: 60vh; overflow-y: auto; margin-top:16px;"></div>
+    <button type="button" class="modal-btn primary" onclick="closeModal('dev-users-modal')" style="margin-top:16px;">Tutup</button>
   </div>
 </div>
 
@@ -578,36 +505,23 @@
   <div class="carousel-header">
     <button class="close-btn" onclick="closeModal('upgrade-carousel-modal')">✕</button>
     <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-    <h1 class="carousel-title" id="carousel-title-text">Dapatkan Milbrav AI Premium</h1>
-    <p class="carousel-sub" id="carousel-sub-text">Lebih banyak ruang untuk menulis, belajar, dan berkreasi</p>
+    <h1 class="carousel-title" id="carousel-title-text">Dapatkan Milbrav AI Premium</h1><p class="carousel-sub" id="carousel-sub-text">Lebih banyak ruang untuk menulis, belajar, dan berkreasi</p>
   </div>
-
   <div class="carousel-container" id="tier-carousel">
-    <div class="tier-card">
-      <div class="feature-table">
-        <div class="header-row">
-          <h4>Fitur</h4>
-          <span style="color:#888;">Gratis</span>
-          <span style="color:#3b82f6;">Premium</span>
-        </div>
+    <!-- Card 1: PREMIUM -->
+    <div class="tier-card"><div class="feature-table">
+        <div class="header-row"><h4>Fitur</h4><span style="color:#888;">Gratis</span><span style="color:#3b82f6;">Premium</span></div>
         <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Lebih banyak pembuatan gambar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Lebih banyak obrolan suara</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Memori lebih panjang</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
-      </div>
-      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Premium', 17000)">Update Akun Baru</button>
-      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
-    </div>
-
-    <div class="tier-card">
-      <div class="feature-table">
-        <div class="header-row">
-          <h4>Fitur</h4>
-          <span style="color:#888;">Gratis</span>
-          <span style="color:#3b82f6;">Pro</span>
-        </div>
+    </div><button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Premium', 17000)">Update Akun Baru</button><div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div></div>
+    
+    <!-- Card 2: PRO -->
+    <div class="tier-card"><div class="feature-table">
+        <div class="header-row"><h4>Fitur</h4><span style="color:#888;">Gratis</span><span style="color:#3b82f6;">Pro</span></div>
         <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
@@ -618,18 +532,11 @@
         <div class="feature-row"><span class="f-name">Pembuatan gambar kualitas lebih tinggi</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Otomatisasi tugas terjadwal</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Codex untuk pemrograman</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
-      </div>
-      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro', 25000)">Update Akun Baru</button>
-      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
-    </div>
+    </div><button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro', 25000)">Update Akun Baru</button><div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div></div>
 
-    <div class="tier-card">
-      <div class="feature-table">
-        <div class="header-row">
-          <h4>Fitur</h4>
-          <span style="color:#888;">Gratis</span>
-          <span style="color:#3b82f6;">Pro+</span>
-        </div>
+    <!-- Card 3: PRO+ -->
+    <div class="tier-card"><div class="feature-table">
+        <div class="header-row"><h4>Fitur</h4><span style="color:#888;">Gratis</span><span style="color:#3b82f6;">Pro+</span></div>
         <div class="feature-row"><span class="f-name">Model inti</span><span class="f-free">✓</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Lebih banyak pesan dengan alat</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name">Penyimpanan file lebih besar</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
@@ -642,51 +549,19 @@
         <div class="feature-row"><span class="f-name">Codex untuk pemrograman</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name" style="color:#10b981; font-weight:bold;">Pro+ sudah tidak ada limit</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
         <div class="feature-row"><span class="f-name" style="color:#10b981; font-weight:bold;">Bisa buat ketik prompt saja (Auto Gambar)</span><span class="f-free">—</span><span class="f-paid">✓</span></div>
-      </div>
-      <button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro+', 45000)">Update Akun Baru</button>
-      <div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div>
-    </div>
+    </div><button class="btn-upgrade-tier" onclick="pilihPaketUpgrade('Pro+', 45000)">Update Akun Baru</button><div class="footer-text">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.<br><br>Pulihkan langganan</div></div>
   </div>
-  
-  <div class="swipe-dots" id="swipe-dots">
-    <div class="dot active" onclick="scrollToCard(0)"></div>
-    <div class="dot" onclick="scrollToCard(1)"></div>
-    <div class="dot" onclick="scrollToCard(2)"></div>
-  </div>
+  <div class="swipe-dots" id="swipe-dots"><div class="dot active" onclick="scrollToCard(0)"></div><div class="dot" onclick="scrollToCard(1)"></div><div class="dot" onclick="scrollToCard(2)"></div></div>
 </div>
 
 <div id="image-preview-modal">
-  <div class="img-preview-header">
-    <button onclick="closeImagePreview()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div class="header-actions">
-        <button onclick="downloadImage()" title="Download">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
-        <button class="btn-bagikan" onclick="shareImage()">Bagikan</button>
-    </div>
-  </div>
-
+  <div class="img-preview-header"><button onclick="closeImagePreview()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="header-actions"><button onclick="downloadImage()" title="Download"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button class="btn-bagikan" onclick="shareImage()">Bagikan</button></div></div>
   <img id="image-preview-content" src="" alt="Preview">
-
   <div class="img-preview-footer">
-    <div class="img-action-btn" onclick="mockFeature('Edit')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span>Edit</span>
-    </div>
-    <div class="img-action-btn" onclick="mockFeature('Anotasi')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-        <span>Anotasi</span>
-    </div>
-    <div class="img-action-btn" onclick="mockFeature('Ubah Ukuran')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-        <span>Ubah Ukuran</span>
-    </div>
-    <div class="img-action-btn danger" onclick="deleteImage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        <span>Hapus</span>
-    </div>
+    <div class="img-action-btn" onclick="mockFeature('Edit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></div>
+    <div class="img-action-btn" onclick="mockFeature('Anotasi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg><span>Anotasi</span></div>
+    <div class="img-action-btn" onclick="mockFeature('Ubah Ukuran')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg><span>Ubah Ukuran</span></div>
+    <div class="img-action-btn danger" onclick="deleteImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Hapus</span></div>
   </div>
 </div>
 
@@ -696,6 +571,11 @@
   const DEV_USERNAME = "DEVELOPER";
   const DEV_PASSWORD = "ahmad emil";
   
+  // ===== GLOBAL API KEY (AGAR USER LAIN BISA PAKAI TANPA SETTING) =====
+  // GANTI "ISI_API_KEY_KAMU_DISINI" DENGAN API KEY ASLI DARI KUNCIAI BOS!
+  const GLOBAL_API_KEY = "sk-live-4289b141e49b08d0c48d1a703b5374e266256b7c3cf40379e62cb8a7314dc28e"; 
+  const GLOBAL_BASE_URL = "https://kunciai.id/v1";
+
   let state = { user: null, chats: [], activeChatId: null };
   const STORAGE_KEY = "milbrav_chat_app";
   
@@ -704,12 +584,9 @@
   function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} }
-    
     if (state.user && state.user.username) {
       const userChatsRaw = localStorage.getItem(`milbrav_chats_${state.user.username}`);
-      if (userChatsRaw) {
-        try { state.chats = JSON.parse(userChatsRaw); } catch(e) {}
-      }
+      if (userChatsRaw) { try { state.chats = JSON.parse(userChatsRaw); } catch(e) {} }
     }
   }
 
@@ -719,42 +596,13 @@
             const lang = (infostring || '').match(/\S*/)[0];
             const validLang = hljs.getLanguage(lang) ? lang : 'plaintext';
             const highlighted = hljs.highlight(code, { language: validLang }).value;
-            return `<div class="code-block-wrapper">
-                        <div class="code-block-header">
-                            <span>${validLang}</span>
-                            <button class="copy-btn" onclick="copyCode(this)">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                Salin
-                            </button>
-                        </div>
-                        <pre><code class="hljs language-${validLang}">${highlighted}</code></pre>
-                    </div>`;
+            return `<div class="code-block-wrapper"><div class="code-block-header"><span>${validLang}</span><button class="copy-btn" onclick="copyCode(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Salin</button></div><pre><code class="hljs language-${validLang}">${highlighted}</code></pre></div>`;
         }
     }
   });
 
-  window.copyCode = function(btn) {
-      const pre = btn.closest('.code-block-wrapper').querySelector('pre');
-      const code = pre.innerText;
-      navigator.clipboard.writeText(code).then(() => {
-          const orig = btn.innerHTML;
-          btn.innerHTML = "Tersalin!";
-          setTimeout(() => btn.innerHTML = orig, 2000);
-      });
-  };
-
-  window.updateProofFileName = function(input) {
-      const label = document.getElementById("proof-upload-label");
-      const nameDisplay = document.getElementById("proof-file-name");
-      
-      if (input.files && input.files.length > 0) {
-          nameDisplay.textContent = "✅ " + input.files[0].name;
-          label.classList.add("file-selected");
-      } else {
-          nameDisplay.textContent = "Ketuk untuk memilih foto";
-          label.classList.remove("file-selected");
-      }
-  };
+  window.copyCode = function(btn) { const pre = btn.closest('.code-block-wrapper').querySelector('pre'); navigator.clipboard.writeText(pre.innerText).then(() => { const orig = btn.innerHTML; btn.innerHTML = "Tersalin!"; setTimeout(() => btn.innerHTML = orig, 2000); }); };
+  window.updateProofFileName = function(input) { const label = document.getElementById("proof-upload-label"); const nameDisplay = document.getElementById("proof-file-name"); if (input.files && input.files.length > 0) { nameDisplay.textContent = "✅ " + input.files[0].name; label.classList.add("file-selected"); } else { nameDisplay.textContent = "Ketuk untuk memilih foto"; label.classList.remove("file-selected"); } };
 
   let isRegisterMode = false;
   let tempSelectedModel = "";
@@ -766,7 +614,6 @@
   const appContainer = document.getElementById("app-container");
   const splashContainer = document.getElementById("splash-container");
   const landingContainer = document.getElementById("landing-container");
-  
   const viewSidebar = document.getElementById("view-sidebar");
   const viewChat = document.getElementById("view-chat");
   const viewProfile = document.getElementById("view-profile");
@@ -774,135 +621,73 @@
   const btnSend = document.getElementById("btn-send");
 
   let MODELS = {
-    "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "" },
-    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "" },
-    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "" },
-    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "" }
+    "milbrav-ai": { name: "Milbrav AI", desc: "Tercepat untuk jawaban cepat", badge: "", apiId: "deepseek-chat" },
+    "milbrav-rose": { name: "Milbrav Rose", desc: "Paling efisien untuk tugas sederhana", badge: "Premium", apiId: "gpt-4o-mini" },
+    "milbrav-walk": { name: "Milbrav Walk", desc: "Untuk pekerjaan kompleks", badge: "Pro", apiId: "claude-3-5-sonnet" },
+    "milbrav-ultra": { name: "Milbrav Ultra", desc: "Untuk tantangan terberat Anda", badge: "Pro", apiId: "gpt-4o" }
   };
 
   function loadModelMapping() {
     const saved = localStorage.getItem("milbrav_model_mapping");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        for (let key in parsed) {
-          if (MODELS[key]) MODELS[key].apiId = parsed[key];
-        }
-      } catch(e) {}
-    }
+    if (saved) { try { const parsed = JSON.parse(saved); for (let key in parsed) { if (MODELS[key]) MODELS[key].apiId = parsed[key]; } } catch(e) {} }
   }
   loadModelMapping();
 
   window.fetchRealModels = async function() {
     const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    if (!globalApi.apiKey) return alert("Isi API Key dulu di menu profil!");
+    if (!globalApi.apiKey && !GLOBAL_API_KEY) return alert("Isi API Key dulu di menu profil!");
+    const apiKeyToUse = globalApi.apiKey || GLOBAL_API_KEY;
+    const baseUrlToUse = globalApi.baseUrl || GLOBAL_BASE_URL;
 
     const select = document.getElementById("select-manual-model");
     select.innerHTML = '<option value="">⏳ Menarik data dari server...</option>';
-
     try {
-        const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'getModels', 
-                apiKey: globalApi.apiKey, 
-                baseUrl: globalApi.baseUrl || "https://kunciai.id/v1" 
-            })
-        });
+        const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getModels', apiKey: apiKeyToUse, baseUrl: baseUrlToUse }) });
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error || "Gagal mengambil data");
-
         select.innerHTML = '<option value="">-- Pilih Model Valid --</option>';
         if (data.data && Array.isArray(data.data)) {
-            data.data.forEach(m => {
-                const opt = document.createElement("option");
-                opt.value = m.id;
-                opt.textContent = m.id;
-                select.appendChild(opt);
-            });
+            data.data.forEach(m => { const opt = document.createElement("option"); opt.value = m.id; opt.textContent = m.id; select.appendChild(opt); });
             alert("Berhasil! Silakan pilih model dari daftar.");
-        } else {
-            select.innerHTML = '<option value="">(Format data tidak dikenali)</option>';
-        }
-    } catch(e) {
-        select.innerHTML = '<option value="">-- Gagal Ambil Model --</option>';
-        alert("Gagal: " + e.message + "\n\nCoba ketik manual di kotak teks bawah.");
-    }
+        } else { select.innerHTML = '<option value="">(Format data tidak dikenali)</option>'; }
+    } catch(e) { select.innerHTML = '<option value="">-- Gagal Ambil Model --</option>'; alert("Gagal: " + e.message + "\n\nCoba ketik manual di kotak teks bawah."); }
   };
 
-  window.scrollToCard = function(index) {
-    const container = document.getElementById("tier-carousel");
-    const cards = container.querySelectorAll(".tier-card");
-    if(cards[index]) {
-        cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  };
-
+  window.scrollToCard = function(index) { const container = document.getElementById("tier-carousel"); const cards = container.querySelectorAll(".tier-card"); if(cards[index]) cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); };
   document.getElementById("tier-carousel").addEventListener("scroll", function() {
-    const scrollLeft = this.scrollLeft;
-    const width = this.clientWidth;
-    const activeIndex = Math.round(scrollLeft / width);
-    
-    const dots = document.querySelectorAll(".dot");
-    dots.forEach((dot, i) => {
-      if(i === activeIndex) dot.classList.add("active");
-      else dot.classList.remove("active");
-    });
-
+    const scrollLeft = this.scrollLeft; const width = this.clientWidth; const activeIndex = Math.round(scrollLeft / width);
+    const dots = document.querySelectorAll(".dot"); dots.forEach((dot, i) => { if(i === activeIndex) dot.classList.add("active"); else dot.classList.remove("active"); });
     const titles = ["Dapatkan Milbrav AI Premium", "Dapatkan Milbrav AI Pro", "Dapatkan Milbrav AI Pro+"];
     const subs = ["Lebih banyak ruang untuk menulis, belajar, dan berkreasi", "AI yang dipersonalisasi untuk keseharian dan pekerjaan", "Bebas batas. Eksplorasi tanpa henti untuk profesional."];
     document.getElementById("carousel-title-text").textContent = titles[activeIndex] || titles[0];
     document.getElementById("carousel-sub-text").textContent = subs[activeIndex] || subs[0];
   });
 
-  window.pilihPaketUpgrade = function(tier, harga) {
-      closeModal('upgrade-carousel-modal');
-      showPayment(tier, harga);
-  };
-
-  function getWaktuLapor() {
-    const now = new Date();
-    const offset = now.getTimezoneOffset(); 
-    let tz = "WIB";
-    if (offset <= -480) tz = "WITA";
-    if (offset <= -540) tz = "WIT";
-    const jam = String(now.getHours()).padStart(2, '0');
-    const menit = String(now.getMinutes()).padStart(2, '0');
-    return `${jam}:${menit} ${tz}`;
-  }
+  window.pilihPaketUpgrade = function(tier, harga) { closeModal('upgrade-carousel-modal'); showPayment(tier, harga); };
+  function getWaktuLapor() { const now = new Date(); const offset = now.getTimezoneOffset(); let tz = "WIB"; if (offset <= -480) tz = "WITA"; if (offset <= -540) tz = "WIT"; return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} ${tz}`; }
 
   window.skipSplash = function() { splashContainer.style.display = "none"; landingContainer.style.display = "flex"; };
   window.goToAuth = function() { landingContainer.style.display = "none"; authContainer.style.display = "flex"; };
   window.backToLanding = function() { authContainer.style.display = "none"; landingContainer.style.display = "flex"; };
 
-  document.getElementById("btn-open-bug-report-user").addEventListener("click", () => {
-    document.getElementById("user-bug-modal").classList.add("active");
-  });
-
+  document.getElementById("btn-open-bug-report-user").addEventListener("click", () => document.getElementById("user-bug-modal").classList.add("active"));
   document.getElementById("btn-submit-bug").addEventListener("click", () => {
     const bugText = document.getElementById("input-bug-report").value.trim();
     if (!bugText) return alert("Laporan tidak boleh kosong!");
-    const waktuLapor = getWaktuLapor();
     let bugReports = JSON.parse(localStorage.getItem("milbrav_bug_reports") || "[]");
-    bugReports.push({ id: "bug_" + Date.now(), username: state.user.username, report: bugText, time: waktuLapor, date: new Date().toLocaleDateString('id-ID') });
+    bugReports.push({ id: "bug_" + Date.now(), username: state.user.username, report: bugText, time: getWaktuLapor(), date: new Date().toLocaleDateString('id-ID') });
     localStorage.setItem("milbrav_bug_reports", JSON.stringify(bugReports));
-    alert("Laporan bug berhasil dikirim ke Developer. Terima kasih!");
-    document.getElementById("input-bug-report").value = "";
-    closeModal("user-bug-modal");
+    alert("Laporan bug berhasil dikirim ke Developer. Terima kasih!"); document.getElementById("input-bug-report").value = ""; closeModal("user-bug-modal");
   });
 
   document.getElementById("btn-view-bug-reports").addEventListener("click", () => {
     const container = document.getElementById("dev-bug-list");
     let bugReports = JSON.parse(localStorage.getItem("milbrav_bug_reports") || "[]");
-    if (bugReports.length === 0) {
-      container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada laporan bug dari user.</p>";
-    } else {
+    if (bugReports.length === 0) { container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada laporan bug.</p>"; } 
+    else {
       container.innerHTML = "";
       bugReports.reverse().forEach(bug => {
-        const div = document.createElement("div");
-        div.className = "dev-request-card";
+        const div = document.createElement("div"); div.className = "dev-request-card";
         div.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;"><b style="color:#fff;">${bug.username}</b> <span style="color:#888; font-size:12px;">${bug.date}</span></div><p style="margin:5px 0; color:#ececec; font-size:14px; line-height: 1.4;">Laporan: ${bug.report}</p><p class="bug-time-text">Jam di lapor: ${bug.time}</p>`;
         container.appendChild(div);
       });
@@ -910,77 +695,67 @@
     document.getElementById("dev-bug-modal").classList.add("active");
   });
 
+  // FITUR BARU: LIST USER
+  document.getElementById("btn-view-users-list").addEventListener("click", () => {
+    const container = document.getElementById("dev-users-list");
+    let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
+    if (Object.keys(users).length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:#888;'>Belum ada user terdaftar.</p>";
+    } else {
+      container.innerHTML = "";
+      Object.keys(users).forEach(u => {
+        const userData = users[u];
+        const div = document.createElement("div");
+        div.className = "dev-request-card";
+        div.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:14px;"><b style="color:#fff;">${u}</b> <span style="color:var(--accent-blue); font-weight:bold;">${userData.tier.toUpperCase()}</span></div>
+                         <p style="font-size:12px; color:#888; margin-top:5px;">Expired: ${userData.expiryDate ? new Date(userData.expiryDate).toLocaleDateString('id-ID') : '-'}</p>`;
+        container.appendChild(div);
+      });
+    }
+    document.getElementById("dev-users-modal").classList.add("active");
+  });
+
   function syncTier() {
     if (!state.user || state.user.isDev) return;
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
     if (users[state.user.username]) {
       const userData = users[state.user.username];
-      
       if (userData.expiryDate && Date.now() > userData.expiryDate) {
-          userData.tier = "free";
-          userData.expiryDate = null;
-          localStorage.setItem("milbrav_users", JSON.stringify(users));
+          userData.tier = "free"; userData.expiryDate = null; localStorage.setItem("milbrav_users", JSON.stringify(users));
           alert("Masa aktif paket Anda telah habis. Akun Anda dikembalikan ke Free.");
       }
-
-      const currentDbTier = userData.tier || "free";
-      state.user.tier = currentDbTier;
-      state.user.expiryDate = userData.expiryDate;
-      saveState();
-      
+      state.user.tier = userData.tier || "free"; state.user.expiryDate = userData.expiryDate; saveState();
       document.getElementById("current-tier-display").textContent = state.user.tier.toUpperCase();
-      
       const expiryDisplay = document.getElementById("expiry-display");
       if (state.user.expiryDate && state.user.tier !== "free") {
-          const dateObj = new Date(state.user.expiryDate);
-          const options = { year: 'numeric', month: 'long', day: 'numeric' };
-          expiryDisplay.textContent = `Aktif s/d: ${dateObj.toLocaleDateString('id-ID', options)}`;
+          expiryDisplay.textContent = `Aktif s/d: ${new Date(state.user.expiryDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}`;
           expiryDisplay.style.display = "block";
-      } else {
-          expiryDisplay.style.display = "none";
-      }
+      } else expiryDisplay.style.display = "none";
     }
   }
 
-  const getDailyLimit = () => {
-    const t = state.user ? state.user.tier : "free";
-    if (t === "dev" || t === "proplus") return Infinity;
-    if (t === "pro") return 2500;
-    if (t === "premium") return 700;
-    return 100;
-  };
-
+  const getDailyLimit = () => { const t = state.user ? state.user.tier : "free"; if (t === "dev" || t === "proplus") return Infinity; if (t === "pro") return 2500; if (t === "premium") return 700; return 100; };
   function canAccessModel(modelKey) {
     if (state.user.isDev) return true;
-    const userTier = (state.user.tier || "free").toLowerCase();
-    let userLevel = 0;
-    if (userTier === "premium") userLevel = 1;
-    else if (userTier === "pro") userLevel = 2;
-    else if (userTier === "proplus") userLevel = 3;
-    let modelLevel = 0; 
-    if (MODELS[modelKey].badge === "Premium") modelLevel = 1;
-    if (MODELS[modelKey].badge === "Pro") modelLevel = 2;
+    const userTier = (state.user.tier || "free").toLowerCase(); let userLevel = 0;
+    if (userTier === "premium") userLevel = 1; else if (userTier === "pro") userLevel = 2; else if (userTier === "proplus") userLevel = 3;
+    let modelLevel = 0; if (MODELS[modelKey].badge === "Premium") modelLevel = 1; if (MODELS[modelKey].badge === "Pro") modelLevel = 2;
     return userLevel >= modelLevel;
   }
 
   window.checkPremium = function(featureName) {
     if (state.user.tier === "free" && !state.user.isDev) { closeModal('plus-modal'); document.getElementById('upgrade-carousel-modal').classList.add('active'); return; }
     if (featureName === 'Pencarian Web') {
-      isWebSearchActive = !isWebSearchActive;
-      const toggle = document.getElementById('toggle-web-search');
-      if (isWebSearchActive) toggle.classList.add('active'); else toggle.classList.remove('active');
-      closeModal('plus-modal');
+      isWebSearchActive = !isWebSearchActive; const toggle = document.getElementById('toggle-web-search');
+      if (isWebSearchActive) toggle.classList.add('active'); else toggle.classList.remove('active'); closeModal('plus-modal');
     } else if (featureName === 'Generate Gambar') {
       const promptGambar = prompt("Masukkan deskripsi gambar yang ingin dibuat:");
       if (promptGambar) {
-        closeModal('plus-modal');
-        const chat = state.chats.find(c => c.id === state.activeChatId);
+        closeModal('plus-modal'); const chat = state.chats.find(c => c.id === state.activeChatId);
         chat.messages.push({ role: "user", content: `[Generate Gambar] ${promptGambar}` });
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptGambar)}?width=1024&height=1024&nologo=true`;
-        chat.messages.push({ role: "assistant", content: `Ini gambar untuk "${promptGambar}":\n![Gambar](${imageUrl})` });
+        chat.messages.push({ role: "assistant", content: `Ini gambar untuk "${promptGambar}":\n![Gambar](https://image.pollinations.ai/prompt/${encodeURIComponent(promptGambar)}?width=1024&height=1024&nologo=true)` });
         if (chat.title === "Obrolan Baru") chat.title = "Gambar: " + promptGambar.substring(0, 15) + "...";
-        document.getElementById("chat-title-header").textContent = chat.title;
-        saveUserChats(); renderChat(); renderHistory();
+        document.getElementById("chat-title-header").textContent = chat.title; saveUserChats(); renderChat(); renderHistory();
       }
     } else { alert(`Fitur ${featureName} segera hadir!`); }
   };
@@ -996,11 +771,7 @@
     recognition.onend = function() { isRecording = false; document.getElementById("btn-voice").classList.remove("mic-active"); };
   };
   setupVoice();
-
-  document.getElementById("btn-voice").addEventListener("click", () => {
-    if (!recognition) return alert("Browser ini tidak mendukung fitur Voice Chat.");
-    if (isRecording) recognition.stop(); else recognition.start();
-  });
+  document.getElementById("btn-voice").addEventListener("click", () => { if (!recognition) return alert("Browser ini tidak mendukung fitur Voice Chat."); if (isRecording) recognition.stop(); else recognition.start(); });
 
   document.getElementById("btn-export-pdf").addEventListener("click", () => {
     const chat = state.chats.find(c => c.id === state.activeChatId);
@@ -1011,13 +782,8 @@
     let y = 30;
     chat.messages.forEach(m => {
       const role = m.role === 'user' ? 'Anda' : 'Milbrav AI';
-      let cleanContent = "";
-      if (Array.isArray(m.content)) {
-          cleanContent = m.content.map(c => c.text || '[Gambar/FILE]').join(' ');
-      } else {
-          cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
-      }
-      const text = `${role}: ${cleanContent}`; const splitText = doc.splitTextToSize(text, 180);
+      let cleanContent = Array.isArray(m.content) ? m.content.map(c => c.text || '[Gambar/FILE]').join(' ') : m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
+      const splitText = doc.splitTextToSize(`${role}: ${cleanContent}`, 180);
       if (y + (splitText.length * 7) > 280) { doc.addPage(); y = 10; }
       doc.text(splitText, 10, y); y += (splitText.length * 7) + 5;
     });
@@ -1025,8 +791,7 @@
   });
 
   document.getElementById("btn-view-user-chats").addEventListener("click", () => {
-    const select = document.getElementById("dev-select-user");
-    select.innerHTML = '<option value="">-- Pilih User --</option>';
+    const select = document.getElementById("dev-select-user"); select.innerHTML = '<option value="">-- Pilih User --</option>';
     let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
     Object.keys(users).forEach(u => { const option = document.createElement("option"); option.value = u; option.textContent = u; select.appendChild(option); });
     document.getElementById("dev-chat-display").innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>`;
@@ -1034,23 +799,16 @@
   });
 
   document.getElementById("dev-select-user").addEventListener("change", (e) => {
-    const username = e.target.value;
-    const display = document.getElementById("dev-chat-display");
+    const username = e.target.value; const display = document.getElementById("dev-chat-display");
     if (!username) { display.innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">Pilih user untuk melihat chat.</p>`; return; }
-    const raw = localStorage.getItem(`milbrav_chats_${username}`);
-    let chats = []; if (raw) { try { chats = JSON.parse(raw); } catch(e) {} }
+    const raw = localStorage.getItem(`milbrav_chats_${username}`); let chats = []; if (raw) { try { chats = JSON.parse(raw); } catch(e) {} }
     if (chats.length === 0) { display.innerHTML = `<p style="text-align: center; color: #666; margin-top: 20px;">User ini belum memiliki chat.</p>`; return; }
     let html = "";
     chats.forEach(chat => {
       html += `<div style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;"><h4 style="color: #60a5fa; margin-bottom: 8px; font-size: 14px;">📁 ${chat.title}</h4>`;
       chat.messages.forEach(m => {
         const role = m.role === 'user' ? 'User' : 'AI'; const color = m.role === 'user' ? '#10b981' : '#ececec';
-        let cleanContent = "";
-        if (Array.isArray(m.content)) {
-            cleanContent = m.content.map(c => c.text || '[Gambar/FILE]').join(' ');
-        } else {
-            cleanContent = m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
-        }
+        let cleanContent = Array.isArray(m.content) ? m.content.map(c => c.text || '[Gambar/FILE]').join(' ') : m.content.replace(/!\[.*?\]\(.*?\)/g, '[Gambar]');
         html += `<div style="margin-bottom: 8px; font-size: 13px; line-height: 1.4;"><span style="color: ${color}; font-weight: bold;">${role}:</span> <span style="color: #aaa; white-space: pre-wrap;">${cleanContent}</span></div>`;
       });
       html += `</div>`;
@@ -1060,16 +818,11 @@
 
   document.getElementById("btn-auth-submit").addEventListener("click", () => {
     try {
-      const username = document.getElementById("auth-username").value.trim();
-      const password = document.getElementById("auth-password").value;
+      const username = document.getElementById("auth-username").value.trim(); const password = document.getElementById("auth-password").value;
       if (!username || !password) return showAuthError("Isi semua data!");
       if (username === DEV_USERNAME && password === DEV_PASSWORD) {
         state.user = { username: DEV_USERNAME, tier: "dev", isDev: true, email: "dev@milbrav.ai" };
-        
-        state.chats = []; 
-        const raw = localStorage.getItem(`milbrav_chats_${DEV_USERNAME}`);
-        if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
-        
+        state.chats = []; const raw = localStorage.getItem(`milbrav_chats_${DEV_USERNAME}`); if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
         state.activeChatId = null; saveState(); enterApp(); return;
       }
       let users = JSON.parse(localStorage.getItem("milbrav_users") || "{}");
@@ -1078,22 +831,24 @@
         if (users[username]) return showAuthError("Username sudah dipakai!");
         users[username] = { password, tier: "free", email: `${username}@gmail.com`, expiryDate: null };
         localStorage.setItem("milbrav_users", JSON.stringify(users));
-        alert("Daftar berhasil! Silakan masuk."); toggleAuthMode(); return;
+        
+        // AUTO LOGIN SETELAH DAFTAR
+        state.user = { username, tier: "free", email: users[username].email, expiryDate: null };
+        state.chats = []; state.activeChatId = null; saveState();
+        alert("Pendaftaran Berhasil! Anda otomatis masuk ke dalam aplikasi."); 
+        enterApp(); return;
       }
       if (!users[username] || users[username].password !== password) return showAuthError("Username / Password salah!");
-      
       state.user = { username, tier: users[username].tier || "free", email: users[username].email, expiryDate: users[username].expiryDate || null };
       state.chats = []; state.activeChatId = null;
-      const raw = localStorage.getItem(`milbrav_chats_${username}`);
-      if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
+      const raw = localStorage.getItem(`milbrav_chats_${username}`); if (raw) { try { state.chats = JSON.parse(raw); } catch(e) {} }
       saveState(); enterApp();
     } catch(e) { alert("Error Login: " + e.message); }
   });
 
   function showAuthError(msg) { const el = document.getElementById("auth-error"); el.textContent = msg; el.style.display = "block"; }
   function toggleAuthMode() {
-    isRegisterMode = !isRegisterMode;
-    document.getElementById("auth-title").textContent = isRegisterMode ? "Buat akun" : "Selamat datang";
+    isRegisterMode = !isRegisterMode; document.getElementById("auth-title").textContent = isRegisterMode ? "Buat akun" : "Selamat datang";
     document.getElementById("btn-auth-submit").textContent = isRegisterMode ? "Daftar" : "Masuk";
     document.getElementById("auth-toggle-text").textContent = isRegisterMode ? "Sudah punya akun?" : "Belum punya akun?";
     document.getElementById("auth-toggle-link").textContent = isRegisterMode ? "Masuk" : "Daftar";
@@ -1113,32 +868,22 @@
       syncTier(); 
 
       if (state.user && state.user.isDev) {
-        document.getElementById("dev-section").style.display = "block";
-        document.getElementById("pdf-section").style.display = "block";
-        document.getElementById("btn-voice").style.display = "flex";
-        document.getElementById("btn-open-bug-report-user").style.display = "none";
-        document.getElementById("manual-model-container").style.display = "block";
-        document.getElementById("model-sub-header").style.display = "flex";
-        document.getElementById("btn-save-model-choice").style.display = "block";
+        document.getElementById("dev-section").style.display = "block"; document.getElementById("pdf-section").style.display = "block";
+        document.getElementById("btn-voice").style.display = "flex"; document.getElementById("btn-open-bug-report-user").style.display = "none";
+        document.getElementById("manual-model-container").style.display = "block"; document.getElementById("model-sub-header").style.display = "flex"; document.getElementById("btn-save-model-choice").style.display = "block";
         const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-        document.getElementById("input-api-key").value = globalApi.apiKey || "";
-        document.getElementById("input-base-url").value = globalApi.baseUrl || "https://kunciai.id/v1";
+        document.getElementById("input-api-key").value = globalApi.apiKey || GLOBAL_API_KEY;
+        document.getElementById("input-base-url").value = globalApi.baseUrl || GLOBAL_BASE_URL;
       } else { 
-        document.getElementById("dev-section").style.display = "none"; 
-        document.getElementById("pdf-section").style.display = "none";
-        document.getElementById("btn-voice").style.display = "none";
-        document.getElementById("btn-open-bug-report-user").style.display = "flex";
-        document.getElementById("manual-model-container").style.display = "none";
-        document.getElementById("model-sub-header").style.display = "none";
-        document.getElementById("btn-save-model-choice").style.display = "none";
+        document.getElementById("dev-section").style.display = "none"; document.getElementById("pdf-section").style.display = "none";
+        document.getElementById("btn-voice").style.display = "none"; document.getElementById("btn-open-bug-report-user").style.display = "flex";
+        document.getElementById("manual-model-container").style.display = "none"; document.getElementById("model-sub-header").style.display = "none"; document.getElementById("btn-save-model-choice").style.display = "none";
       }
 
       let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
       if (!state.user.isDev) {
           const tier = (state.user.tier || "free").toLowerCase();
-          if (tier === "free") gApi.model = "milbrav-ai";
-          else if (tier === "premium") gApi.model = "milbrav-rose";
-          else if (tier === "pro" || tier === "proplus") gApi.model = "milbrav-walk";
+          if (tier === "free") gApi.model = "milbrav-ai"; else if (tier === "premium") gApi.model = "milbrav-rose"; else if (tier === "pro" || tier === "proplus") gApi.model = "milbrav-walk";
           localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
       }
 
@@ -1146,108 +891,43 @@
         tempSelectedModel = gApi.model || "milbrav-ai";
         document.getElementById("select-manual-model").innerHTML = '<option value="">-- Tarik Otomatis / Ketik Manual --</option>';
         document.getElementById("manual-model-text").value = ""; 
-        renderModelList();
-        document.getElementById("model-modal").classList.add("active");
+        renderModelList(); document.getElementById("model-modal").classList.add("active");
       };
 
       updateModelUI(gApi.model || "milbrav-ai");
-
       viewSidebar.classList.remove("active"); viewProfile.classList.remove("active"); viewChat.classList.add("active");
       if (state.chats && state.chats.length > 0) { openChat(state.chats[0].id); } else { createNewChat(true); }
-    } catch(e) { console.error("Error saat masuk aplikasi:", e); alert("Terjadi kesalahan data saat masuk. Error: " + e.message); }
+    } catch(e) { console.error("Error masuk:", e); alert("Error: " + e.message); }
   }
 
   document.getElementById("btn-plus-menu").addEventListener("click", () => document.getElementById("plus-modal").classList.add("active"));
-
-  function updateModelUI(modelKey) {
-    let modelData = MODELS[modelKey];
-    if (!modelData) { modelData = { name: "Milbrav AI", desc: "Model kustom" }; }
-    document.getElementById("current-model-name").textContent = modelData.name;
-  }
+  function updateModelUI(modelKey) { let modelData = MODELS[modelKey] || { name: "Milbrav AI" }; document.getElementById("current-model-name").textContent = modelData.name; }
 
   function renderModelList() {
-    const container = document.getElementById("model-list-container");
-    container.innerHTML = "";
+    const container = document.getElementById("model-list-container"); container.innerHTML = "";
     Object.keys(MODELS).forEach(key => {
-      const m = MODELS[key];
-      const div = document.createElement("div");
-      div.className = "model-item" + (key === tempSelectedModel ? " selected" : "");
-      
-      const hasAccess = canAccessModel(key);
-      let lockIcon = "";
-      if (!hasAccess && !state.user.isDev) {
-         lockIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="margin-left:auto; margin-right:10px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
-         div.style.opacity = "0.6";
-      }
-
-      let descHtml = m.desc;
-      if (state.user.isDev) {
-          descHtml = `Model KunciAI: <span style="color:#10b981; font-weight:bold;">${m.apiId || 'Belum diatur'}</span>`;
-      }
-
-      div.innerHTML = `
-        <div class="model-info" style="flex:1;">
-          <h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4>
-          <p>${descHtml}</p>
-        </div>
-        ${lockIcon}
-        <svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-      `;
-
+      const m = MODELS[key]; const div = document.createElement("div"); div.className = "model-item" + (key === tempSelectedModel ? " selected" : "");
+      const hasAccess = canAccessModel(key); let lockIcon = "";
+      if (!hasAccess && !state.user.isDev) { lockIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="margin-left:auto; margin-right:10px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`; div.style.opacity = "0.6"; }
+      let descHtml = m.desc; if (state.user.isDev) { descHtml = `Model KunciAI: <span style="color:#10b981; font-weight:bold;">${m.apiId || 'Belum diatur'}</span>`; }
+      div.innerHTML = `<div class="model-info" style="flex:1;"><h4>${m.name} ${m.badge ? `<span class="badge pro">${m.badge}</span>` : ''}</h4><p>${descHtml}</p></div>${lockIcon}<svg class="model-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
       div.onclick = () => {
-        if (!hasAccess && !state.user.isDev) {
-          closeModal('model-modal');
-          document.getElementById('upgrade-carousel-modal').classList.add('active');
-          return;
-        }
-        if (state.user.isDev) {
-          tempSelectedModel = key;
-          document.getElementById("manual-model-text").value = MODELS[key].apiId || "";
-          document.getElementById("select-manual-model").value = "";
-          renderModelList(); 
-        } else {
-          let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-          gApi.model = key;
-          localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-          updateModelUI(key);
-          closeModal("model-modal");
-        }
-      };
-      container.appendChild(div);
+        if (!hasAccess && !state.user.isDev) { closeModal('model-modal'); document.getElementById('upgrade-carousel-modal').classList.add('active'); return; }
+        if (state.user.isDev) { tempSelectedModel = key; document.getElementById("manual-model-text").value = MODELS[key].apiId || ""; document.getElementById("select-manual-model").value = ""; renderModelList(); } 
+        else { let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}"); gApi.model = key; localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); updateModelUI(key); closeModal("model-modal"); }
+      }; container.appendChild(div);
     });
   }
 
   document.getElementById("btn-save-model-choice").addEventListener("click", () => {
     if (!state.user.isDev) return; 
-    
-    const selectValue = document.getElementById("select-manual-model").value;
-    const manualValue = document.getElementById("manual-model-text").value.trim();
-    
-    let finalModelId = "";
-    
-    if (manualValue) {
-      finalModelId = manualValue;
-    } else if (selectValue) {
-      finalModelId = selectValue;
-    }
-
-    if (!finalModelId) {
-      alert(`Bos, Anda belum memilih Model KunciAI!\n\nKlik "Tarik Otomatis" atau ketik manual nama modelnya.`);
-      return;
-    }
-
+    const selectValue = document.getElementById("select-manual-model").value; const manualValue = document.getElementById("manual-model-text").value.trim();
+    let finalModelId = manualValue || selectValue;
+    if (!finalModelId) { alert(`Bos, Anda belum memilih Model KunciAI!`); return; }
     MODELS[tempSelectedModel].apiId = finalModelId;
-    let map = JSON.parse(localStorage.getItem("milbrav_model_mapping") || "{}");
-    map[tempSelectedModel] = finalModelId;
-    localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
-
-    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    gApi.model = tempSelectedModel;
-    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
-    
-    updateModelUI(tempSelectedModel);
-    closeModal("model-modal");
-    alert(`Berhasil disimpan! ${MODELS[tempSelectedModel].name} menggunakan: ${finalModelId}`);
+    let map = JSON.parse(localStorage.getItem("milbrav_model_mapping") || "{}"); map[tempSelectedModel] = finalModelId; localStorage.setItem("milbrav_model_mapping", JSON.stringify(map));
+    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}"); gApi.model = tempSelectedModel; localStorage.setItem("milbrav_global_api", JSON.stringify(gApi));
+    updateModelUI(tempSelectedModel); closeModal("model-modal"); alert(`Berhasil disimpan!`);
   });
 
   function closeModal(id) { document.getElementById(id).classList.remove("active"); }
@@ -1265,103 +945,48 @@
     state.chats.forEach(c => {
       const wrapper = document.createElement("div"); wrapper.className = "history-item-wrapper";
       const actions = document.createElement("div"); actions.className = "history-actions";
-      const btnEdit = document.createElement("div"); btnEdit.className = "btn-action btn-edit";
-      btnEdit.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
-      btnEdit.onclick = (e) => { e.stopPropagation(); editChat(c.id); };
-      const btnDel = document.createElement("div"); btnDel.className = "btn-action btn-del";
-      btnDel.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-      btnDel.onclick = (e) => { e.stopPropagation(); deleteChat(c.id); };
+      const btnEdit = document.createElement("div"); btnEdit.className = "btn-action btn-edit"; btnEdit.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`; btnEdit.onclick = (e) => { e.stopPropagation(); editChat(c.id); };
+      const btnDel = document.createElement("div"); btnDel.className = "btn-action btn-del"; btnDel.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`; btnDel.onclick = (e) => { e.stopPropagation(); deleteChat(c.id); };
       actions.appendChild(btnEdit); actions.appendChild(btnDel);
-      const content = document.createElement("div");
-      content.className = "history-item-content" + (c.id === state.activeChatId ? " active" : "");
-      content.textContent = c.title;
-      
+      const content = document.createElement("div"); content.className = "history-item-content" + (c.id === state.activeChatId ? " active" : ""); content.textContent = c.title;
       let startX = 0, startY = 0, isSwiping = false, isMoved = false;
       content.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; isMoved = false; isSwiping = true; });
       content.addEventListener('touchmove', (e) => {
         if (!isSwiping) return;
         let diffX = startX - e.touches[0].clientX; let diffY = startY - e.touches[0].clientY;
         if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) isMoved = true;
-        if (diffX > 0) content.style.transform = `translateX(-${Math.min(diffX, 100)}px)`;
-        else if (diffX < 0) content.style.transform = `translateX(0px)`;
+        if (diffX > 0) content.style.transform = `translateX(-${Math.min(diffX, 100)}px)`; else if (diffX < 0) content.style.transform = `translateX(0px)`;
       });
       content.addEventListener('touchend', (e) => {
         isSwiping = false; let diffX = startX - e.changedTouches[0].clientX;
-        if (isMoved) {
-          if (diffX > 40) { content.style.transform = `translateX(-100px)`; content.classList.add('swiped'); }
-          else { content.style.transform = `translateX(0px)`; content.classList.remove('swiped'); }
-        } else {
-          if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; }
-          else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); }
-        }
+        if (isMoved) { if (diffX > 40) { content.style.transform = `translateX(-100px)`; content.classList.add('swiped'); } else { content.style.transform = `translateX(0px)`; content.classList.remove('swiped'); } } 
+        else { if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; } else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); } }
       });
       content.addEventListener('click', (e) => {
-         if (!('ontouchstart' in window)) {
-             if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; }
-             else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); }
-         }
+         if (!('ontouchstart' in window)) { if (content.classList.contains('swiped')) { content.classList.remove('swiped'); content.style.transform = `translateX(0px)`; } else { viewSidebar.classList.remove("active"); viewChat.classList.add("active"); openChat(c.id); } }
       });
       wrapper.appendChild(actions); wrapper.appendChild(content); list.appendChild(wrapper);
     });
   }
 
-  window.editChat = function(id) {
-    const chat = state.chats.find(c => c.id === id); if (!chat) return;
-    const newName = prompt("Masukkan nama baru:", chat.title);
-    if (newName && newName.trim() !== "") { chat.title = newName.trim(); saveUserChats(); renderHistory(); if (state.activeChatId === id) document.getElementById("chat-title-header").textContent = chat.title; }
-  };
-  window.deleteChat = function(id) {
-    if (!confirm("Hapus obrolan ini?")) return;
-    state.chats = state.chats.filter(c => c.id !== id); saveUserChats();
-    localStorage.removeItem(`milbrav_draft_${state.user.username}_${id}`);
-    if (state.activeChatId === id) { if (state.chats.length > 0) openChat(state.chats[0].id); else createNewChat(true); }
-    renderHistory();
-  };
-  
-  function createNewChat(isFirstLogin = false) {
-    if (!isFirstLogin && state.activeChatId) {
-      const activeChat = state.chats.find(c => c.id === state.activeChatId);
-      if (activeChat && activeChat.messages.length === 0) return; 
-    }
-    const chat = { id: "chat_" + Date.now(), title: "Obrolan Baru", messages: [] };
-    state.chats.unshift(chat); saveUserChats(); openChat(chat.id);
-  }
-  
-  function openChat(id) {
-    state.activeChatId = id; 
-    document.getElementById("chat-title-header").textContent = state.chats.find(c => c.id === id).title;
-    const draftKey = `milbrav_draft_${state.user.username}_${id}`;
-    inputMessage.value = localStorage.getItem(draftKey) || "";
-    inputMessage.style.height = "auto"; inputMessage.style.height = (inputMessage.scrollHeight) + "px";
-    updateSendButtonState(); renderChat(); renderHistory();
-  }
-  
+  window.editChat = function(id) { const chat = state.chats.find(c => c.id === id); if (!chat) return; const newName = prompt("Masukkan nama baru:", chat.title); if (newName && newName.trim() !== "") { chat.title = newName.trim(); saveUserChats(); renderHistory(); if (state.activeChatId === id) document.getElementById("chat-title-header").textContent = chat.title; } };
+  window.deleteChat = function(id) { if (!confirm("Hapus obrolan ini?")) return; state.chats = state.chats.filter(c => c.id !== id); saveUserChats(); localStorage.removeItem(`milbrav_draft_${state.user.username}_${id}`); if (state.activeChatId === id) { if (state.chats.length > 0) openChat(state.chats[0].id); else createNewChat(true); } renderHistory(); };
+  function createNewChat(isFirstLogin = false) { if (!isFirstLogin && state.activeChatId) { const activeChat = state.chats.find(c => c.id === state.activeChatId); if (activeChat && activeChat.messages.length === 0) return; } const chat = { id: "chat_" + Date.now(), title: "Obrolan Baru", messages: [] }; state.chats.unshift(chat); saveUserChats(); openChat(chat.id); }
+  function openChat(id) { state.activeChatId = id; document.getElementById("chat-title-header").textContent = state.chats.find(c => c.id === id).title; const draftKey = `milbrav_draft_${state.user.username}_${id}`; inputMessage.value = localStorage.getItem(draftKey) || ""; inputMessage.style.height = "auto"; inputMessage.style.height = (inputMessage.scrollHeight) + "px"; updateSendButtonState(); renderChat(); renderHistory(); }
   function saveUserChats() { if (state.user) localStorage.setItem(`milbrav_chats_${state.user.username}`, JSON.stringify(state.chats)); }
   
   async function typeMessage(element, fullText) {
       element.innerHTML = '<span class="typing-cursor"></span>';
-      let i = 0;
-      const speed = 15; 
+      let i = 0; const speed = 15; 
       return new Promise(resolve => {
           const timer = setInterval(() => {
-              i += 3; 
-              let partial = fullText.substring(0, i);
+              i += 3; let partial = fullText.substring(0, i);
               let escaped = partial.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
               element.innerHTML = escaped.replace(/\n/g, '<br>') + '<span class="typing-cursor"></span>';
-              const chatBox = document.getElementById("chat-messages");
-              chatBox.scrollTop = chatBox.scrollHeight;
+              const chatBox = document.getElementById("chat-messages"); chatBox.scrollTop = chatBox.scrollHeight;
               if (i >= fullText.length) {
-                  clearInterval(timer);
-                  element.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
-                  renderMathInElement(element, {
-                      delimiters: [
-                          {left: '$$', right: '$$', display: true},
-                          {left: '$', right: '$', display: false},
-                          {left: '\\(', right: '\\)', display: false},
-                          {left: '\\[', right: '\\]', display: true}
-                      ],
-                      throwOnError: false
-                  });
+                  clearInterval(timer); element.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
+                  renderMathInElement(element, { delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false},{left: '\\(', right: '\\)', display: false},{left: '\\[', right: '\\]', display: true}], throwOnError: false });
                   resolve();
               }
           }, speed);
@@ -1369,271 +994,186 @@
   }
 
   function renderChat(typingMode = false) {
-    const chat = state.chats.find(c => c.id === state.activeChatId);
-    const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
-    
+    const chat = state.chats.find(c => c.id === state.activeChatId); const box = document.getElementById("chat-messages"); box.innerHTML = ""; if (!chat) return;
     chat.messages.forEach((m, index) => {
       const row = document.createElement("div"); row.className = "message " + m.role;
       let contentHtml = "";
-
       if (m.role === 'assistant') {
-          if (typingMode && index === chat.messages.length - 1) {
-              row.innerHTML = `<div class="msg-content markdown-body" id="typing-target" style="padding-left: 0;"></div>`;
-          } else {
+          if (typingMode && index === chat.messages.length - 1) { row.innerHTML = `<div class="msg-content markdown-body" id="typing-target" style="padding-left: 0;"></div>`; } 
+          else {
               let rawText = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">');
-              let parsed = marked.parse(rawText);
-              contentHtml = DOMPurify.sanitize(parsed);
+              contentHtml = DOMPurify.sanitize(marked.parse(rawText));
               row.innerHTML = `<div class="msg-content markdown-body" style="padding-left: 0;">${contentHtml}</div>`;
           }
       } else {
-          if (Array.isArray(m.content)) {
-              m.content.forEach(part => {
-                  if (part.type === "text") {
-                      contentHtml += `<div>${part.text.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">')}</div>`;
-                  } else if (part.type === "image_url") {
-                      contentHtml += `<img src="${part.image_url.url}" class="msg-image" style="max-width: 200px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;" onclick="openImagePreview(this.src)">`;
-                  }
-              });
-          } else {
-              contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">');
-          }
+          if (Array.isArray(m.content)) { m.content.forEach(part => { if (part.type === "text") { contentHtml += `<div>${part.text.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">')}</div>`; } else if (part.type === "image_url") { contentHtml += `<img src="${part.image_url.url}" class="msg-image" style="max-width: 200px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;" onclick="openImagePreview(this.src)">`; } }); } 
+          else { contentHtml = m.content.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="msg-image" onclick="openImagePreview(this.src)">'); }
           row.innerHTML = `<div class="msg-content">${contentHtml}</div><div class="msg-avatar user">${state.user.username.charAt(0).toUpperCase()}</div>`;
       }
       box.appendChild(row);
     });
     box.scrollTop = box.scrollHeight;
-
-    if (!typingMode) {
-        renderMathInElement(box, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });
-    }
+    if (!typingMode) renderMathInElement(box, { delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false},{left: '\\(', right: '\\)', display: false},{left: '\\[', right: '\\]', display: true}], throwOnError: false });
   }
 
-  window.openImagePreview = function(src) {
-      currentPreviewImageUrl = src;
-      document.getElementById("image-preview-content").src = src;
-      document.getElementById("image-preview-modal").classList.add("active");
-  };
-  window.closeImagePreview = function() {
-      document.getElementById("image-preview-modal").classList.remove("active");
-  };
-  window.downloadImage = function() {
-      const a = document.createElement("a");
-      a.href = currentPreviewImageUrl;
-      a.download = "Milbrav_Image_" + Date.now() + ".jpg";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-  };
-  window.shareImage = function() {
-      if (navigator.share) {
-          navigator.share({ title: 'Milbrav AI', url: currentPreviewImageUrl });
-      } else {
-          alert("Fitur share tidak didukung di browser ini. Silakan download gambarnya.");
-      }
-  };
-  window.mockFeature = function(name) {
-      alert(`Fitur "${name}" akan segera hadir di versi selanjutnya!`);
-  };
-  window.deleteImage = function() {
-      if(!confirm("Hapus gambar ini dari tampilan? (Tidak menghapus dari chat)")) return;
-      closeImagePreview();
-  };
+  window.openImagePreview = function(src) { currentPreviewImageUrl = src; document.getElementById("image-preview-content").src = src; document.getElementById("image-preview-modal").classList.add("active"); };
+  window.closeImagePreview = function() { document.getElementById("image-preview-modal").classList.remove("active"); };
+  window.downloadImage = function() { const a = document.createElement("a"); a.href = currentPreviewImageUrl; a.download = "Milbrav_Image_" + Date.now() + ".jpg"; document.body.appendChild(a); a.click(); document.body.removeChild(a); };
+  window.shareImage = function() { if (navigator.share) { navigator.share({ title: 'Milbrav AI', url: currentPreviewImageUrl }); } else { alert("Fitur share tidak didukung di browser ini. Silakan download gambarnya."); } };
+  window.mockFeature = function(name) { alert(`Fitur "${name}" akan segera hadir di versi selanjutnya!`); };
+  window.deleteImage = function() { if(!confirm("Hapus gambar ini dari tampilan? (Tidak menghapus dari chat)")) return; closeImagePreview(); };
 
   window.handleFileSelect = async function(input) {
-    if (!input.files || !input.files[0]) return;
-    const file = input.files[0];
+    if (!input.files || !input.files[0]) return; const file = input.files[0];
     if (file.size > 5 * 1024 * 1024) { alert("File terlalu besar. Maksimal 5MB ya bos!"); input.value = ""; return; }
-    
     const reader = new FileReader();
-    
     if (file.type.startsWith('image/')) {
         reader.onload = async function(e) {
             const compressed = await compressImage(e.target.result, 800, 0.8);
             currentAttachment = { name: file.name, type: file.type, isText: false, data: compressed };
-            document.getElementById("attachment-preview").style.display = "flex";
-            document.getElementById("attachment-name").textContent = "Gambar: " + file.name;
-            updateSendButtonState();
-            closeModal('plus-modal'); input.value = ""; 
-        };
-        reader.readAsDataURL(file);
-    } 
-    else {
+            document.getElementById("attachment-preview").style.display = "flex"; document.getElementById("attachment-name").textContent = "Gambar: " + file.name;
+            updateSendButtonState(); closeModal('plus-modal'); input.value = ""; 
+        }; reader.readAsDataURL(file);
+    } else {
         reader.onload = function(e) {
             currentAttachment = { name: file.name, type: file.type, isText: true, data: e.target.result };
-            document.getElementById("attachment-preview").style.display = "flex";
-            document.getElementById("attachment-name").textContent = "Teks: " + file.name;
-            updateSendButtonState();
-            closeModal('plus-modal'); input.value = ""; 
+            document.getElementById("attachment-preview").style.display = "flex"; document.getElementById("attachment-name").textContent = "Teks: " + file.name;
+            updateSendButtonState(); closeModal('plus-modal'); input.value = ""; 
         };
-        if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
-            reader.readAsText(file);
-        } else {
-            alert("Untuk saat ini hanya mendukung gambar dan file teks (txt/csv/json)");
-            input.value = "";
-        }
+        if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.json')) { reader.readAsText(file); } else { alert("Hanya mendukung gambar dan file teks (txt/csv/json)"); input.value = ""; }
     }
   };
 
-  window.removeAttachment = function() {
-    currentAttachment = null; document.getElementById("attachment-preview").style.display = "none"; updateSendButtonState();
-  };
-
-  function updateSendButtonState() {
-    const hasText = inputMessage.value.trim().length > 0;
-    const hasAttachment = currentAttachment !== null;
-    btnSend.disabled = !(hasText || hasAttachment);
-  }
+  window.removeAttachment = function() { currentAttachment = null; document.getElementById("attachment-preview").style.display = "none"; updateSendButtonState(); };
+  function updateSendButtonState() { const hasText = inputMessage.value.trim().length > 0; const hasAttachment = currentAttachment !== null; btnSend.disabled = !(hasText || hasAttachment); }
 
   inputMessage.addEventListener("input", function() {
     this.style.height = "auto"; this.style.height = (this.scrollHeight) + "px";
-    if (state.user && state.activeChatId) {
-      const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
-      if (this.value.trim().length > 0) localStorage.setItem(draftKey, this.value); else localStorage.removeItem(draftKey);
-    }
+    if (state.user && state.activeChatId) { const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`; if (this.value.trim().length > 0) localStorage.setItem(draftKey, this.value); else localStorage.removeItem(draftKey); }
     updateSendButtonState();
   });
 
   btnSend.addEventListener("click", async () => {
-    const text = inputMessage.value.trim(); 
-    if (!text && !currentAttachment) return;
+    const text = inputMessage.value.trim(); if (!text && !currentAttachment) return;
     
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const usageKey = `milbrav_usage_${state.user.username}_${todayKey}`;
-    let usageToday = parseInt(localStorage.getItem(usageKey) || "0", 10);
-    const limit = getDailyLimit();
+    const todayKey = new Date().toISOString().slice(0, 10); const usageKey = `milbrav_usage_${state.user.username}_${todayKey}`;
+    let usageToday = parseInt(localStorage.getItem(usageKey) || "0", 10); const limit = getDailyLimit();
+    if (limit !== Infinity && usageToday >= limit) { document.getElementById('upgrade-carousel-modal').classList.add('active'); return; }
 
-    if (limit !== Infinity && usageToday >= limit) {
-        document.getElementById('upgrade-carousel-modal').classList.add('active');
-        return;
-    }
-
-    const globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    if (!globalApi.apiKey) {
-      if (state.user.isDev) return alert("Isi API Key KunciAI di menu Profil > Developer Area!"); else return alert("Sistem belum siap: API Key belum diatur.");
+    // ====== FALLBACK KE GLOBAL API KEY ======
+    let globalApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+    if (!globalApi.apiKey) { globalApi.apiKey = GLOBAL_API_KEY; globalApi.baseUrl = GLOBAL_BASE_URL; }
+    
+    if (!globalApi.apiKey || globalApi.apiKey === "ISI_API_KEY_KAMU_DISINI") {
+      if (state.user.isDev) return alert("Isi API Key KunciAI di menu Profil > Developer Area!"); else return alert("Sistem belum siap: API Key belum diatur oleh Developer.");
     }
 
     const chat = state.chats.find(c => c.id === state.activeChatId);
-    
     let userMessageContent = text;
-    
     if (currentAttachment) {
-        if (currentAttachment.isText) {
-            userMessageContent = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`;
-        } else {
-            userMessageContent = [
-                { type: "text", text: text || "Tolong jelaskan gambar ini." },
-                { type: "image_url", image_url: { url: currentAttachment.data } }
-            ];
-        }
+        if (currentAttachment.isText) { userMessageContent = `[User melampirkan file: ${currentAttachment.name}]\n\nIsi File:\n${currentAttachment.data}\n\nPesan User:\n${text}`; } 
+        else { userMessageContent = [ { type: "text", text: text || "Tolong jelaskan gambar ini." }, { type: "image_url", image_url: { url: currentAttachment.data } } ]; }
     }
 
     chat.messages.push({ role: "user", content: userMessageContent });
     removeAttachment();
-    
     if (chat.title === "Obrolan Baru") chat.title = (text || (currentAttachment ? "Gambar" : "Lampiran")).substring(0, 20) + "...";
-    document.getElementById("chat-title-header").textContent = chat.title;
-    
-    const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
-    localStorage.removeItem(draftKey);
+    document.getElementById("chat-title-header").
+            textContent = chat.title;
+        
+        const draftKey = `milbrav_draft_${state.user.username}_${state.activeChatId}`;
+        localStorage.removeItem(draftKey);
 
-    inputMessage.value = ""; inputMessage.style.height = "auto"; updateSendButtonState(); 
-    renderChat(); 
+        inputMessage.value = ""; inputMessage.style.height = "auto"; updateSendButtonState(); 
+        renderChat(); 
 
-    const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
-    
-    const isImagePrompt = /gambar|logo|foto|ilustrasi|bikin|buat/i.test(text);
-    const isProPlus = (state.user.tier === 'proplus' || state.user.isDev);
+        const loadingRow = document.createElement("div"); loadingRow.className = "message ai"; loadingRow.id = "loading-row";
+        
+        const isImagePrompt = /gambar|logo|foto|ilustrasi|bikin|buat/i.test(text);
+        const isProPlus = (state.user.tier === 'proplus' || state.user.isDev);
 
-    if (isImagePrompt && isProPlus) {
-        loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">🎨 Menggambar...</div>`;
+        if (isImagePrompt && isProPlus) {
+            loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">🎨 Menggambar...</div>`;
+            document.getElementById("chat-messages").appendChild(loadingRow);
+
+            try {
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true`;
+                await new Promise(r => setTimeout(r, 3000));
+                const aiText = `Ini gambar yang Bos minta:\n\n![Gambar](${imageUrl})`;
+                chat.messages.push({ role: "assistant", content: aiText });
+                saveUserChats();
+                
+                document.getElementById("loading-row").remove();
+                renderChat(true);
+                const typingTarget = document.getElementById("typing-target");
+                if (typingTarget) await typeMessage(typingTarget, aiText);
+                if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
+                return; 
+            } catch (err) {
+                document.getElementById("loading-row").remove();
+                chat.messages.push({ role: "assistant", content: `❌ Gagal membuat gambar: ${err.message}` });
+                renderChat();
+                return;
+            }
+        }
+
+        const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
+        loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">${loadingText}</div>`;
         document.getElementById("chat-messages").appendChild(loadingRow);
 
         try {
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true`;
-            await new Promise(r => setTimeout(r, 3000));
-            const aiText = `Ini gambar yang Bos minta:\n\n![Gambar](${imageUrl})`;
-            chat.messages.push({ role: "assistant", content: aiText });
-            saveUserChats();
-            
+          const modelKeyToUse = globalApi.model || "milbrav-ai";
+          const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : "";
+          
+          if (!realApiModelId) {
             document.getElementById("loading-row").remove();
-            renderChat(true);
-            const typingTarget = document.getElementById("typing-target");
-            if (typingTarget) await typeMessage(typingTarget, aiText);
-            if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
-            return; 
-        } catch (err) {
-            document.getElementById("loading-row").remove();
-            chat.messages.push({ role: "assistant", content: `❌ Gagal membuat gambar: ${err.message}` });
-            renderChat();
+            alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "Tarik Otomatis" atau ketik manual nama modelnya.`);
             return;
+          }
+          
+          const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
+
+          const res = await fetch('/api/chat', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ apiKey: globalApi.apiKey, baseUrl: globalApi.baseUrl, model: realApiModelId, messages: apiMessages, webSearch: isWebSearchActive })
+          });
+          
+          if (!res.ok) { const errTxt = await res.text(); throw new Error(`Vercel Error (${res.status}): ${errTxt}`); }
+          const data = await res.json();
+          document.getElementById("loading-row").remove();
+          if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
+
+          const aiText = data.choices?.[0]?.message?.content || "Tidak ada jawaban.";
+          chat.messages.push({ role: "assistant", content: aiText });
+          saveUserChats();
+          
+          renderChat(true);
+          const typingTarget = document.getElementById("typing-target");
+          if (typingTarget) await typeMessage(typingTarget, aiText);
+        } catch(err) {
+          if(document.getElementById("loading-row")) document.getElementById("loading-row").remove();
+          alert("Gagal mengambil respons.\nDetail Error: " + err.message);
+          chat.messages.push({ role: "assistant", content: `❌ Error Sistem: ${err.message}` });
+          renderChat();
         }
-    }
-
-    const loadingText = isWebSearchActive ? "Mencari di web..." : "Thinking...";
-    loadingRow.innerHTML = `<div class="msg-content" style="color:#888; padding-left: 0;">${loadingText}</div>`;
-    document.getElementById("chat-messages").appendChild(loadingRow);
-
-    try {
-      const modelKeyToUse = globalApi.model || "milbrav-ai";
-      const realApiModelId = MODELS[modelKeyToUse] ? MODELS[modelKeyToUse].apiId : "";
-      
-      if (!realApiModelId) {
-        document.getElementById("loading-row").remove();
-        alert(`Bos, Model AI untuk "${MODELS[modelKeyToUse].name}" belum diatur!\n\nSilakan masuk sebagai Developer (Dev), buka menu Pemilihan Model, klik "Tarik Otomatis" atau ketik manual nama modelnya.`);
-        return;
-      }
-      
-      const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
-
-      const res = await fetch('/api/chat', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: globalApi.apiKey, baseUrl: globalApi.baseUrl, model: realApiModelId, messages: apiMessages, webSearch: isWebSearchActive })
       });
-      
-      if (!res.ok) { const errTxt = await res.text(); throw new Error(`Vercel Error (${res.status}): ${errTxt}`); }
-      const data = await res.json();
-      document.getElementById("loading-row").remove();
-      if (limit !== Infinity) localStorage.setItem(usageKey, usageToday + 1);
 
-      const aiText = data.choices?.[0]?.message?.content || "Tidak ada jawaban.";
-      chat.messages.push({ role: "assistant", content: aiText });
-      saveUserChats();
-      
-      renderChat(true);
-      const typingTarget = document.getElementById("typing-target");
-      if (typingTarget) await typeMessage(typingTarget, aiText);
-    } catch(err) {
-      if(document.getElementById("loading-row")) document.getElementById("loading-row").remove();
-      alert("Gagal mengambil respons.\nDetail Error: " + err.message);
-      chat.messages.push({ role: "assistant", content: `❌ Error Sistem: ${err.message}` });
-      renderChat();
-    }
-  });
+      document.getElementById("btn-save-api").addEventListener("click", () => {
+        const apiKey = document.getElementById("input-api-key").value; 
+        const baseUrl = document.getElementById("input-base-url").value;
+        let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
+        gApi.apiKey = apiKey; gApi.baseUrl = baseUrl;
+        localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); 
+        alert("API Key & Base URL berhasil disimpan!");
+      });
 
-  document.getElementById("btn-save-api").addEventListener("click", () => {
-    const apiKey = document.getElementById("input-api-key").value; 
-    const baseUrl = document.getElementById("input-base-url").value;
-    let gApi = JSON.parse(localStorage.getItem("milbrav_global_api") || "{}");
-    gApi.apiKey = apiKey; gApi.baseUrl = baseUrl;
-    localStorage.setItem("milbrav_global_api", JSON.stringify(gApi)); 
-    alert("API Key & Base URL berhasil disimpan!");
-  });
-
-  document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-carousel-modal").classList.add("active"));
-  document.getElementById("btn-sudah-bayar").addEventListener("click", () => { closeModal("payment-modal"); document.getElementById("proof-modal").classList.add("active"); });
-  let currentSelectedTier = ""; let currentSelectedPrice = 0;
-  window.showPayment = function(tier, price) {
-    currentSelectedTier = tier; currentSelectedPrice = price;
-    document.getElementById("pay-tier-name").textContent = "Paket " + tier;
+      document.getElementById("btn-show-upgrade").addEventListener("click", () => document.getElementById("upgrade-carousel-modal").classList.add("active"));
+      document.getElementById("btn-sudah-bayar").addEventListener("click", () => { closeModal("payment-modal"); document.getElementById("proof-modal").classList.add("active"); });
+      let currentSelectedTier = ""; let currentSelectedPrice = 0;
+      window.showPayment = function(tier, price) {
+        currentSelectedTier = tier; currentSelectedPrice = price;
+        document.getElementById("pay-tier-name").textContent = "Paket " + tier;
         document.getElementById("pay-total-price").textContent = "Rp " + price.toLocaleString('id-ID');
         closeModal("upgrade-carousel-modal"); document.getElementById("payment-modal").classList.add("active");
       };
