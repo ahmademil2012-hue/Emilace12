@@ -1,0 +1,6 @@
+{
+  "milbrav-ai": "deepseek-v4-flash",
+  "milbrav-rose": "grok-4.5",
+  "milbrav-walk": "glm-5.0-turbo",
+  "milbrav-ultra": "gpt-6"
+}
